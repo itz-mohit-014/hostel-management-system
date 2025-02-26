@@ -14,8 +14,116 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique 
-  password String 
-  name String  
+  id               String      @id @default(uuid())
+  name             String
+  email            String
+  password         String
+  registrationDate DateTime    @default(now())
+  profile          Profile?
+  complaint        Complaint[]
+  fees           Fees[]
+}
+
+model Admin {
+  id       String   @id @default(uuid())
+  name     String
+  email    String
+  password String
+  role     Role     @default(Warden)
+  profile  Profile?
+  notice   Notice[]
+  hostel   Hostel[]
+
+}
+
+model Profile {
+  id             String  @id @default(uuid())
+  contact        Int?
+  profilePicture String?
+  //only students can have room no
+  roomNo         Int?
+  //Only student Can have hostel name
+  hostelName     String?
+  //hostel Care only warden gets hostel care
+  hostelCare     String?
+  department     String?
+  admin          Admin   @relation(fields: [adminId], references: [id])
+  adminId        String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  userId         String  @unique
+}
+
+model Complaint {
+  id            String    @id @default(uuid())
+  type          String
+  title         String
+  complaintDate DateTime  @default(now())
+  status        Status    @default(pending)
+  description   String    @db.VarChar(300)
+  resolveDate   DateTime?
+  image         String?
+  upvote        Int       @default(0)
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+  reslovedBy    String?
+}
+
+model Notice {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.VarChar(300)
+  noticeDate  DateTime @default(now())
+  adminId     String
+  admin       Admin    @relation(fields: [adminId], references: [id])
+}
+
+model Hostel {
+  id            Int    @id @default(autoincrement())
+  hostelName    String
+  roomCount     Int
+  roomOccoupied Int    @default(0)
+  admin         Admin  @relation(fields: [adminId], references: [id])
+  adminId       String
+  managedBy     String?
+  room          Room[]
+}
+
+model Room {
+  id       String @id @default(uuid())
+  roomNo   Int
+  hostelId Int
+  hostel   Hostel @relation(fields: [hostelId], references: [id])
+}
+
+model Fees {
+  id          String @id @default(uuid())
+  paymentId   String @unique
+  paymentSlip String
+  paymentAmount Int
+  paymentDate DateTime @default(now())
+  user        User @relation(fields: [userId], references: [id])
+  userId     String
+}
+
+model Outing {
+   id          String @id @default(cuid())
+   studentId   String
+   outingDate   DateTime 
+   returnDate   DateTime
+   outingPurpose String @db.VarChar(300)
+   approvalStatus  Status @default(pending)
+   approverId    String?
+   checkOutTime  DateTime?
+   securitySignature  String?
+
+}
+enum Status {
+  resolved
+  pending
+  reject
+}
+
+enum Role {
+  Warden
+  Admin
 }
