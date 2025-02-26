@@ -1,15 +1,16 @@
 import { z } from "zod";
 const passwordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/;
 
 export const registerSchema = z.object({
   name: z.string(),
   email: z.string().email(),
-  passwrod: z
+  password: z
     .string()
     .min(5, { message: "password Length can not be less than 5 char" })
     .max(20, { message: "password Length can not be less than 5 char" })
-    .regex(passwordRegex),
+    .regex(passwordRegex)
+    
 });
 
 export const loginSchema = z.object({
