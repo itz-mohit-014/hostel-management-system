@@ -1,3 +1,4 @@
+import ThemeToggleBtn from '@/components/theme-toggle-btn'
 import { Button } from '@/components/ui/button'
 import { Building2,  Users,  FileText,  CreditCard,  Bell,  Settings,  LogOut } from 'lucide-react'
 
@@ -40,6 +41,7 @@ export default function Dashboard() {
         <header className="flex h-16 items-center justify-between border-b px-6">
           <h1 className="font-semibold">Dashboard</h1>
           <div className="flex items-center gap-4">
+            <ThemeToggleBtn/>
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>
