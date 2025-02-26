@@ -40,7 +40,7 @@ export default function Login() {
             </Button>
           </div>
           <div className="text-center text-sm">
-            Don't have an account?{' '}
+            Don't have an account? &npsp;
             <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
               Sign up
             </Link>
