@@ -1,13 +1,9 @@
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, FileText, CreditCard } from "lucide-react";
 import ThemeToggleBtn from "@/components/theme-toggle-btn";
 
-
-
 export default function Home() {
-
   return (
     <div className="min-h-screen">
       <nav className="border-b">
@@ -17,7 +13,7 @@ export default function Home() {
             <span className="text-xl font-bold">HMS</span>
           </div>
           <div className="ml-auto flex items-center space-x-4">
-            <ThemeToggleBtn/>
+            <ThemeToggleBtn />
 
             <Link href="/signin">
               <Button variant="ghost">Login</Button>
@@ -28,7 +24,6 @@ export default function Home() {
           </div>
         </div>
       </nav>
-
       <main>
         <section className="container px-4 py-24 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
@@ -83,6 +78,7 @@ export default function Home() {
           </div>
         </section>
       </main>
+s
     </div>
   );
 }
