@@ -3,8 +3,6 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import  bcrypt  from 'bcrypt';
 import { JWT } from "next-auth/jwt";
-import session from '../../../../node_modules/next-auth/core/routes/session.d';
-
 
 export const  nextOptions:NextAuthOptions = {
     providers:[
