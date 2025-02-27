@@ -6,6 +6,7 @@ import { useRef, useState, useEffect, type KeyboardEvent, type ClipboardEvent } 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
+
 export default function OTPInput() {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""))
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -88,7 +89,7 @@ export default function OTPInput() {
   }, [])
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <form className="flex flex-col items-center space-y-4">
       <h2 className="text-xl font-semibold">Enter Verification Code</h2>
       <div className="flex space-x-2">
         {otp.map((digit, index) => (
@@ -118,11 +119,11 @@ export default function OTPInput() {
         <Button variant="outline" onClick={handleCancel}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} disabled={!isOtpComplete()}>
+        <Button type="submit" onClick={handleSubmit} disabled={!isOtpComplete()}>
           Submit
         </Button>
       </div>
-    </div>
+    </form>
   )
 }
 

@@ -13,9 +13,9 @@ export const registerSchema = z.object({
     
 });
 
-export const loginSchema = z.object({
+export const loginValidation = z.object({
   email: z.string().email(),
-  passwrod: z
+  password: z
     .string()
     .min(5, { message: "password Length can not be less than 5 char" })
     .max(20, { message: "password Length can not be less than 5 char" })
