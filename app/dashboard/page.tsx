@@ -1,6 +1,9 @@
+"use client"
+
 import ThemeToggleBtn from '@/components/theme-toggle-btn'
 import { Button } from '@/components/ui/button'
 import { Building2,  Users,  FileText,  CreditCard,  Bell,  Settings,  LogOut } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 
 export default function Dashboard() {
   return (
@@ -45,7 +48,10 @@ export default function Dashboard() {
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={()=>signOut({
+                callbackUrl:"/"
+              })}>
+
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

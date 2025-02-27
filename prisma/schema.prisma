@@ -21,7 +21,7 @@ model User {
   registrationDate DateTime    @default(now())
   profile          Profile?
   complaint        Complaint[]
-  fees           Fees[]
+  fees             Fees[]
 }
 
 model Admin {
@@ -33,7 +33,6 @@ model Admin {
   profile  Profile?
   notice   Notice[]
   hostel   Hostel[]
-
 }
 
 model Profile {
@@ -77,19 +76,20 @@ model Notice {
   admin       Admin    @relation(fields: [adminId], references: [id])
 }
 
-model Otp{
-  id    String @default(cuid()) @id
-  otp   String
+model Otp {
+  id        String   @id @default(cuid())
+  otp       String
   createdAt DateTime @default(now())
-  expiresAt DateTime 
-  email    String
+  expiresAt DateTime
+  email     String
 }
+
 model Hostel {
-  id            Int    @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   hostelName    String
   roomCount     Int
-  roomOccoupied Int    @default(0)
-  admin         Admin  @relation(fields: [adminId], references: [id])
+  roomOccoupied Int     @default(0)
+  admin         Admin   @relation(fields: [adminId], references: [id])
   adminId       String
   managedBy     String?
   room          Room[]
@@ -103,27 +103,27 @@ model Room {
 }
 
 model Fees {
-  id          String @id @default(uuid())
-  paymentId   String @unique
-  paymentSlip String
+  id            String   @id @default(uuid())
+  paymentId     String   @unique
+  paymentSlip   String
   paymentAmount Int
-  paymentDate DateTime @default(now())
-  user        User @relation(fields: [userId], references: [id])
-  userId     String
+  paymentDate   DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
 }
 
 model Outing {
-   id          String @id @default(cuid())
-   studentId   String
-   outingDate   DateTime 
-   returnDate   DateTime
-   outingPurpose String @db.VarChar(300)
-   approvalStatus  Status @default(pending)
-   approverId    String?
-   checkOutTime  DateTime?
-   securitySignature  String?
-
+  id                String    @id @default(cuid())
+  studentId         String
+  outingDate        DateTime
+  returnDate        DateTime
+  outingPurpose     String    @db.VarChar(300)
+  approvalStatus    Status    @default(pending)
+  approverId        String?
+  checkOutTime      DateTime?
+  securitySignature String?
 }
+
 enum Status {
   resolved
   pending
