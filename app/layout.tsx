@@ -1,6 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
+import NextAuthProvider from "./pages/NextAuthProvider";
 
 export default function RootLayout({
   children,
@@ -17,7 +18,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+
+            <NextAuthProvider>
             {children}
+            </NextAuthProvider>
             <Toaster/>
           </ThemeProvider>
         </body>

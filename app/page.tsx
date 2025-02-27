@@ -17,10 +17,10 @@ export default function Home() {
           <div className="ml-auto flex items-center space-x-4">
             <ThemeToggleBtn />
 
-            <Link href="/signin">
+            <Link href="/auth/signin">
               <Button variant="ghost">Login</Button>
             </Link>
-            <Link href="/signup">
+            <Link href="/auth/signup">
               <Button>Sign Up</Button>
             </Link>
           </div>
@@ -36,10 +36,10 @@ export default function Home() {
             allocations, and hostel facilities.
           </p>
           <div className="mt-10 flex justify-center gap-4">
-            <Link href="/signup">
+            <Link href="/auth/signup">
               <Button size="lg">Get Started</Button>
             </Link>
-            <Link href="/signin">
+            <Link href="/auth/signin">
               <Button variant="outline" size="lg">
                 Learn More
               </Button>

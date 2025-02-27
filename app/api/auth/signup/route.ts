@@ -7,7 +7,8 @@ import { prisma } from "@/lib/prisma";
 
 export  const POST = async (req:NextRequest) => {
     const data = await req.json()
-    const parseData = registerSchema.safeParse(data)
+    const parseData = registerSchema.safeParse(data.userData);
+
     if(!parseData || !parseData.success){
         return NextResponse.json({
             message:"Invalid Details"
@@ -15,7 +16,19 @@ export  const POST = async (req:NextRequest) => {
             status:411
         })
     } 
+
     try {
+
+       const Otp = await prisma.otp.findFirst({
+            where:{
+                email: data.userData.email
+            }
+        })
+
+        if(!Otp || (Otp.otp !== data.otp)){
+            throw new Error("Invalid OTP.")
+        }
+
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashPassword = bcrypt.hashSync(parseData.data.password, salt);
@@ -26,7 +39,8 @@ export  const POST = async (req:NextRequest) => {
                 email:parseData.data.email,
                 password:hashPassword,
             }
-        })    
+        })  
+
         if(!createUser.id){
             throw new Error("Failed to create User")
         }
@@ -45,7 +59,5 @@ export  const POST = async (req:NextRequest) => {
         },{
             status:500
         })
-    }
-
-    
+    }    
 }

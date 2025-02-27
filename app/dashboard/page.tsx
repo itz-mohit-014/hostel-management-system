@@ -2,13 +2,20 @@
 
 import ThemeToggleBtn from '@/components/theme-toggle-btn'
 import { Button } from '@/components/ui/button'
+import {  Loader } from '@/components/ui/Loader'
 import { Building2,  Users,  FileText,  CreditCard,  Bell,  Settings,  LogOut } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 
 export default function Dashboard() {
+
+    const {data:session , status} = useSession()
+  console.log(session)
+    if( status === "loading" ) return <Loader/>
+    
+    if(!session) return null;
+
   return (
     <div className="min-h-screen grid grid-cols-[280px_1fr]">
-      {/* Sidebar */}
       <div className="border-r bg-muted/40">
         <div className="flex h-16 items-center gap-2 px-6 border-b">
           <Building2 className="h-6 w-6" />
@@ -38,11 +45,9 @@ export default function Dashboard() {
         </nav>
       </div>
 
-      {/* Main Content */}
       <div>
-        {/* Header */}
         <header className="flex h-16 items-center justify-between border-b px-6">
-          <h1 className="font-semibold">Dashboard</h1>
+          <h1 className="font-semibold">Dashboard {session.user?.name} </h1>
           <div className="flex items-center gap-4">
             <ThemeToggleBtn/>
             <Button variant="ghost" size="icon">
@@ -57,7 +62,6 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Dashboard Content */}
         <main className="p-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-lg border bg-card p-6">
@@ -90,7 +94,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Recent Activity */}
           <div className="mt-8">
             <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
             <div className="rounded-lg border">
