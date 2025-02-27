@@ -22,7 +22,7 @@ export const POST = async(req:NextRequest)=>{
             throw new Error("Otp generation failed")
         }
 
-        const mailResponse = await mailSender(data.email, "Otp", otp)
+        const mailResponse = await mailSender(data.email, otp)
 
         return NextResponse.json({
             success:true,
