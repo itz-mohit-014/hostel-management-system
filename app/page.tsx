@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, FileText, CreditCard } from "lucide-react";
 import ThemeToggleBtn from "@/components/theme-toggle-btn";
+import { Toaster } from 'react-hot-toast';
+
 
 export default function Home() {
   return (
@@ -78,7 +80,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-s
     </div>
+  
   );
 }

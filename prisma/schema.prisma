@@ -77,6 +77,13 @@ model Notice {
   admin       Admin    @relation(fields: [adminId], references: [id])
 }
 
+model Otp{
+  id    String @default(cuid()) @id
+  otp   String
+  createdAt DateTime @default(now())
+  expiresAt DateTime 
+  email    String
+}
 model Hostel {
   id            Int    @id @default(autoincrement())
   hostelName    String
