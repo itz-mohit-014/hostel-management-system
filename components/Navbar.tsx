@@ -35,36 +35,36 @@ const Navbar = () => {
           </h1>
         </Link>
 
-        {/* Desktop Menu */}
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#home" className="animated-link text-foreground/90 hover:text-foreground">
+          <Link href="#home" className="animated-link text-foreground/90 hover:text-foreground">
             Home
-          </a>
-          <a href="#features" className="animated-link text-foreground/90 hover:text-foreground">
+          </Link>
+          <Link href="#features" className="animated-link text-foreground/90 hover:text-foreground">
             Features
-          </a>
-          <a href="#testimonials" className="animated-link text-foreground/90 hover:text-foreground">
+          </Link>
+          <Link href="#testimonials" className="animated-link text-foreground/90 hover:text-foreground">
             Testimonials
-          </a>
-          <a href="#contact" className="animated-link text-foreground/90 hover:text-foreground">
+          </Link>
+          <Link href="#contact" className="animated-link text-foreground/90 hover:text-foreground">
             Contact
-          </a>
+          </Link>
+
           <ThemeToggle />
+          
           <Link
-            href="/login"
+            href="/auth/signin"
             className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow transition-colors hover:bg-accent/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             Login
           </Link>
           <Link
-            href="/signup"
+            href="/auth/signup"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             Get Started
           </Link>
         </nav>
 
-        {/* Mobile Menu Button */}
         <div className="flex items-center space-x-4 md:hidden">
           <ThemeToggle />
           <button
@@ -77,47 +77,46 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 glass glass-dark animate-slide-down">
           <nav className="container mx-auto py-4 flex flex-col space-y-4">
-            <a
+            <Link
               href="#home"
               className="px-4 py-2 hover:bg-muted rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
-            </a>
-            <a
+            </Link>
+            <Link
               href="#features"
               className="px-4 py-2 hover:bg-muted rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Features
-            </a>
-            <a
+            </Link>
+            <Link
               href="#testimonials"
               className="px-4 py-2 hover:bg-muted rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Testimonials
-            </a>
-            <a
+            </Link>
+            <Link
               href="#contact"
               className="px-4 py-2 hover:bg-muted rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
-            </a>
+            </Link>
             <Link
-              href="/login"
+              href="/auth/signin"
               className="mx-4 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow transition-colors hover:bg-accent/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Login
             </Link>
             <Link
-              href="/signup"
+              href="/auth/signup"
               className="mx-4 inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               onClick={() => setIsMobileMenuOpen(false)}
             >

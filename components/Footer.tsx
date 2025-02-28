@@ -1,18 +1,17 @@
 
 import { useState } from "react";
 import { ChevronUp } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Listen for scroll events to show/hide the scroll to top button
   if (typeof window !== "undefined") {
     window.addEventListener("scroll", () => {
       setShowScrollTop(window.scrollY > 500);
     });
   }
 
-  // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -25,12 +24,12 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
-            <a href="#" className="flex items-center mb-4">
+            <Link href="/" className="flex items-center mb-4">
               <h1 className="text-xl font-serif font-semibold">
                 <span className="heading-gradient">Hostel</span>
                 <span className="text-primary dark:text-primary">Haven</span>
               </h1>
-            </a>
+            </Link>
             <p className="text-foreground/80 mb-4">
               Transforming hostel management with elegant technology solutions.
             </p>
@@ -40,24 +39,24 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 font-serif">Features</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
                   Room Booking
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
                   Student Management
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
                   Complaints Handling
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#features" className="text-foreground/80 hover:text-foreground transition-colors">
                   Notice Board
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -66,24 +65,24 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 font-serif">Company</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   Careers
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#contact" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#contact" className="text-foreground/80 hover:text-foreground transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -92,19 +91,19 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 font-serif">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+                <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
                   Cookie Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -115,23 +114,22 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} HostelHaven. All rights reserved.
           </p>
           <div className="flex items-center space-x-4">
-            <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
               Twitter
-            </a>
-            <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+            </Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
               LinkedIn
-            </a>
-            <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+            </Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
               Facebook
-            </a>
-            <a href="#" className="text-foreground/80 hover:text-foreground transition-colors">
+            </Link>
+            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
               Instagram
-            </a>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Scroll to top button */}
       <button
         onClick={scrollToTop}
         className={`fixed bottom-6 right-6 p-3 rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring hover-scale ${

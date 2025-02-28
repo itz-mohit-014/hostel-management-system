@@ -3,13 +3,13 @@ export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{5,}$/;
 
 export const registerSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
+  name: z.string({message:"name is required."}),
+  email: z.string().email({message:"email is not valid."}),
   password: z
     .string()
     .min(5, { message: "password Length can not be less than 5 char" })
     .max(20, { message: "password Length can not be less than 5 char" })
-    .regex(passwordRegex)
+    .regex(passwordRegex, {message: "password must include 1 uppercase, 1 lowercase, any digit, any special symbol."})
     
 });
 

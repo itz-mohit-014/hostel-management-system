@@ -5,14 +5,31 @@ import { Button } from '@/components/ui/button'
 import {  Loader } from '@/components/ui/Loader'
 import { Building2,  Users,  FileText,  CreditCard,  Bell,  Settings,  LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
+import toast from 'react-hot-toast'
 
 export default function Dashboard() {
 
     const {data:session , status} = useSession()
-  console.log(session)
+  
     if( status === "loading" ) return <Loader/>
     
     if(!session) return null;
+
+    const handleLogoutUser = () => {
+      
+      try {
+        
+        signOut({
+          callbackUrl:"/"
+        })
+        
+        toast.success("loggout successfully.")
+      } catch (error) {
+        const err = (error as Error).message
+        toast.error(err || "something went wrong");
+      }
+
+    }
 
   return (
     <div className="min-h-screen grid grid-cols-[280px_1fr]">
@@ -53,9 +70,7 @@ export default function Dashboard() {
             <Button variant="ghost" size="icon">
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={()=>signOut({
-                callbackUrl:"/"
-              })}>
+            <Button variant="ghost" size="icon" onClick={handleLogoutUser}>
 
               <LogOut className="h-5 w-5" />
             </Button>

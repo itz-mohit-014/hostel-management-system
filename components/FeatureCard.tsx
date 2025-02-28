@@ -18,6 +18,7 @@ const FeatureCard = ({
   delay = 0,
   color = "primary" 
 }: FeatureCardProps) => {
+
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -49,7 +50,6 @@ const FeatureCard = ({
     };
   }, [delay]);
 
-  // Generate background gradient class based on color prop
   const gradientClasses = {
     primary: "from-primary/10 to-transparent",
     secondary: "from-secondary/20 to-transparent",
@@ -68,22 +68,20 @@ const FeatureCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Card background with gradient */}
+
       <div 
         className={`absolute inset-0 bg-gradient-to-br ${gradientClass} rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0`}
       />
       
-      {/* Card border */}
+
       <div 
         className={`absolute inset-0 rounded-xl border border-border/30 group-hover:border-primary/50 dark:group-hover:border-primary/40 transition-colors duration-500 z-0 ${
           isHovered ? 'shadow-lg shadow-primary/5 dark:shadow-primary/10' : ''
         }`}
       />
       
-      {/* Indicator dot in top right */}
       <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-primary/70 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-125"></div>
       
-      {/* Icon container with animated background */}
       <div className="relative z-10 mb-6">
         <div className={`relative w-14 h-14 rounded-lg flex items-center justify-center bg-gradient-to-br from-background via-background to-background/80 border border-border/30 transition-all duration-300 group-hover:scale-110 overflow-hidden`}>
           <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -95,7 +93,6 @@ const FeatureCard = ({
         </div>
       </div>
       
-      {/* Content */}
       <div className="relative z-10">
         <h3 className="text-xl font-medium font-serif mb-3 transition-colors group-hover:text-foreground/90">
           {title}
@@ -105,7 +102,7 @@ const FeatureCard = ({
         </p>
       </div>
       
-      {/* Interactive elements that appear on hover */}
+
       <div className={`absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 ${isHovered ? 'translate-y-0' : 'translate-y-4'}`}>
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
           <svg 

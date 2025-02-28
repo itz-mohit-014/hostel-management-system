@@ -1,95 +1,193 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Building2 } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { passwordRegex, registerSchema } from "@/common/types";
+import { Mail, Lock, User, Github, Twitter } from "lucide-react";
+import AuthLayout from "@/components/layouts/AuthLayout";
+import FormInput from "@/components/ui/FormInput";
+import SocialButton from "@/components/SocialButton";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { passwordRegex, registerSchema } from "@/common/types";
+import { parseEnv } from "util";
+import { string } from "zod";
+import axios from "axios";
 
-interface IFormValue {
+interface SignUpFormData {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
+  acceptTerms: boolean;
 }
 
-/**
- * @working_flow
- *   
- * 1. validate fill data.. (if any invalid throw error ) 
- * 2. save valid data to local storage then sent otp request...
- * 3. navigate to OTP page... (sent opt and save email  to db for temporary)
- * 4. validate otp
- * 5. save user credentials to db from get local storage 
- * 6. clear local storage user
- * 7. navigate new user to dashboard.
- * 
- */
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  acceptTerms?: string;
+}
 
-
-export default function SignUp() {
-  const [password, setPassword] = useState<boolean>(true);
-
-  const router = useRouter()
+const SignUp = () => {
+  const [formData, setFormData] = useState<SignUpFormData>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptTerms: false,
+  });
   
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch
-  } = useForm<IFormValue>();
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  let enterPassword = watch("password", ""); 
+  const router = useRouter();
 
-  const registerHandler = async (data: IFormValue) => {
-    const id = toast.loading("Sending OTP...");
-    if (data.password !== data.confirmPassword) {
-      setPassword(false);
-      return;
-    }
+  const validateForm = (toastId:string): boolean => {
+    const newErrors: FormErrors = {};
+    let isValid = true;
 
-    try {
-      const parseData = registerSchema.safeParse(data);
+    const parseData = registerSchema.safeParse(formData);
+
+    console.log(parseData);
 
       if (!parseData.success) {
-        toast.error("Please enter valid data", {
-          id: id,
-        });
-        return;
+
+        parseData.error.issues.map((issue) => {
+          // @ts-ignore
+          newErrors[issue.path[0]] = issue.message;
+          isValid = false;
+        })
+
       }
 
-      localStorage.setItem("userData", JSON.stringify(parseData.data));
+      if(formData.password !== formData.confirmPassword){
+        newErrors.confirmPassword = "password is not match";
+        isValid = false;
+      }
+
+      const lastErrorMessage = Object.values(newErrors).slice(-1)[0];
+      
+      if(lastErrorMessage){
+        toast.dismiss();
+        toast.error(lastErrorMessage, { id: toastId});
+      }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    
+    // Clear error when user types
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+  };
+
+  // const registerHandler = async (data:SignUpFormData) => {
+  //   const id = toast.loading("Sending OTP...");
+    
+
+  //   try {
+  //     const parseData = registerSchema.safeParse(data);
+
+  //     if (!parseData.success) {
+  //       toast.error("Please enter valid data", {
+  //         id: id,
+  //       });
+  //       return;
+  //     }
+
+  //     if (formData.password !== formData.confirmPassword) {
+  //       newErrors.confirmPassword = "Passwords do not match";
+  //       isValid = false;
+  //     }
+
+  //     localStorage.setItem("userData", JSON.stringify(parseData.data));
+
+  //     const otpData = {
+  //       email: parseData.data.email,
+  //     };
+
+  //     const generateOtp = await axios.post("/api/auth/otp", otpData);
+
+  //     if(generateOtp.data.success){
+  //       toast.success(generateOtp.data.message,{
+  //         id:id
+  //       })
+  //       router.push('/auth/otp')
+  //     }
+      
+  //     router.push('/auth/otp')
+
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       toast.error(error.response?.data?.message || "Something went wrong", {
+  //         id: id,
+  //       });
+  //     } else {
+  //       toast.error("Something went wrong", {
+  //         id: id,
+  //       });
+  //     }
+  //   }
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const toastId = toast.loading("Sending OTP...");
+    
+    if (!validateForm(toastId)) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+
+      localStorage.setItem("userData", JSON.stringify(formData));
 
       const otpData = {
-        email: parseData.data.email,
+        email: formData.email,
       };
 
       const generateOtp = await axios.post("/api/auth/otp", otpData);
 
       if(generateOtp.data.success){
+
         toast.success(generateOtp.data.message,{
-          id:id
+          id:toastId
         })
+
         router.push('/auth/otp')
       }
       
-      router.push('/auth/otp')
-
     } catch (error) {
+      
       if (axios.isAxiosError(error)) {
+        
         toast.error(error.response?.data?.message || "Something went wrong", {
-          id: id,
+          id: toastId,
         });
+
       } else {
+        
         toast.error("Something went wrong", {
-          id: id,
+          id: toastId,
         });
+
       }
+      
+    } finally {
+
+      setIsSubmitting(false);
     }
   };
 
@@ -98,111 +196,111 @@ export default function SignUp() {
   }, [])
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
-      <div className="hidden lg:block bg-muted" />
-      <div className="flex items-center justify-center p-8">
-        <div className="mx-auto w-full max-w-sm space-y-6">
-          <div className="space-y-2 text-center">
-            <Building2 className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="text-2xl font-bold">Create an account</h1>
-            <p className="text-muted-foreground">
-              Enter your information to create your account
-            </p>
-          </div>
+    <AuthLayout 
+      title="Create an Account" 
+      subtitle="Enter your information to create your account"
+      authType="signup"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <FormInput
+          id="name"
+          name="name"
+          label="Full Name"
+          type="text"
+          autoComplete="name"
+          value={formData.name}
+          onChange={handleChange}
+          error={errors.name}
+          icon={<User size={18} />}
+          required
+        />
 
-          <form onSubmit={handleSubmit(registerHandler)} className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                {...register("name", { required: true })}
-                id="name"
-                placeholder="Enter your name"
-                type="text"
-                autoComplete="name"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">
-                  Please provide full name
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Input
-                {...register("email", { required: true })}
-                id="email"
-                placeholder="name@example.com"
-                type="email"
-                autoCapitalize="none"
-                autoComplete="email"
-                autoCorrect="off"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm">
-                  Email can't be empty.
-                </p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Input
-                {...register("password" , { required: true , pattern: passwordRegex })}
-                id="password"
-                placeholder="Create a password"
-                type="password"
-                autoComplete="new-password"
-              />
+        <FormInput
+          id="email"
+          name="email"
+          label="Email Address"
+          type="email"
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleChange}
+          error={errors.email}
+          icon={<Mail size={18} />}
+          required
+        />
 
-              {!passwordRegex.test(enterPassword) && (
-                  <ul className="text-xs mt-2 text-gray-600">
-                  <li className={`${enterPassword.length >= 8 ? "text-green-600" : "text-black dark:text-white"}  mb-1 text-sm `}>
-                    ✅ At least 8 characters
-                  </li>
-                  <li className={`${/[A-Z]/.test(enterPassword) ? "text-green-600" : "text-black dark:text-white"}   mb-1 text-sm` }>
-                    ✅ At least 1 uppercase letter
-                  </li>
-                  <li className={`${/[a-z]/.test(enterPassword) ? "text-green-600" : "text-black dark:text-white"}   mb-1 text-sm` }>
-                    ✅ At least 1 lowercase letter
-                  </li>
-                  <li className={`${/\d/.test(enterPassword) ? "text-green-600" : "text-black dark:text-white"}   mb-1 text-sm`}>
-                    ✅ At least 1 number
-                  </li>
-                  <li className={`${/[!@#$%^&*]/.test(enterPassword) ? "text-green-600" : "text-black dark:text-white"}   mb-1 text-sm`}>
-                    ✅ At least 1 special character (!@#$%^&*)
-                  </li>
-                </ul>
-              )} 
+        <FormInput
+          id="password"
+          name="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+          icon={<Lock size={18} />}
+          required
+        />
 
-            </div>
-            <div className="space-y-2">
-              <Input
-                {...register("confirmPassword" , { required: true })}
-                id="confirmPassword"
-                placeholder="Confirm your password"
-                type="password"
-                autoComplete="new-password"
-              />
+        <FormInput
+          id="confirmPassword"
+          name="confirmPassword"
+          label="Confirm Password"
+          type="password"
+          autoComplete="new-password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          error={errors.confirmPassword}
+          icon={<Lock size={18} />}
+          required
+        />
 
-              {!password && (
-                <p className="text-red-500 text-sm">
-                  Password and Confirm password can not be different
-                </p>
-              )}
-            </div>
+        <div className="flex items-start space-x-2">
+          <input
+            id="acceptTerms"
+            name="acceptTerms"
+            type="checkbox"
+            className="h-4 w-4 mt-1 rounded border-input bg-background focus:ring-primary"
+            checked={formData.acceptTerms}
+            onChange={handleChange}
+            required
+          />
+          <label htmlFor="acceptTerms" className="text-sm text-foreground/70">
+            I agree to the{" "}
+            <a href="#" className="text-primary hover:text-primary/80 transition-colors">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-primary hover:text-primary/80 transition-colors">
+              Privacy Policy
+            </a>
+          </label>
+        </div>
+        {errors.acceptTerms && (
+          <p className="text-destructive text-xs mt-1">{errors.acceptTerms}</p>
+        )}
 
-            <Button type="submit" className="w-full">
-              Create Account
-            </Button>
-          </form>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full flex justify-center items-center py-3 px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          {isSubmitting ? (
+            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+          ) : (
+            "Create Account"
+          )}
+        </button>
 
-          <div className="text-center text-sm">
-            Already have an account?{" "}
-            <Link
-              href="/auth/signin"
-              className="text-primary underline-offset-4 font-semibold hover:underline"
-            >
-              Sign in
-            </Link>
+        <div className="relative mt-6">
+          <div className="absolute inset-0 flex items-center flex-col">
+            <div className="w-full border-t border-border"></div>
+            <div className="w-full"></div>
           </div>
         </div>
-      </div>
-    </div>
+
+      </form>
+    </AuthLayout>
   );
-}
+};
+
+export default SignUp;

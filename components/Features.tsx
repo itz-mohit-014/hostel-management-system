@@ -67,13 +67,11 @@ const Features = () => {
 
   return (
     <section id="features" className="py-20 bg-accent/20 dark:bg-accent/10 relative overflow-hidden">
-      {/* Background elements */}
       <div 
         className="absolute inset-0 -z-10 bg-background opacity-50 dark:opacity-80"
         aria-hidden="true"
       />
       
-      {/* Decorative shapes */}
       <div className="absolute -z-10 top-0 left-0 w-full h-full overflow-hidden">
         <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-primary/5 blur-3xl"></div>
         <div className="absolute bottom-10 right-10 w-80 h-80 rounded-full bg-secondary/5 blur-3xl"></div>
