@@ -1,180 +1,169 @@
 "use client"
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronLeft, EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
-import { Mail, Lock } from "lucide-react";
-import AuthLayout from "@/components/layouts/AuthLayout";
-import FormInput from "@/components/ui/FormInput";
 import toast from "react-hot-toast";
-import { loginValidation } from "@/common/types";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
-interface SigninFormData {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
+export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("student");
 
-interface FormErrors {
-  email?: string;
-  password?: string;
-}
-
-const Signin = () => {
-  const [formData, setFormData] = useState<SigninFormData>({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
-  
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const router = useRouter();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-    
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
-    setIsSubmitting(true);
-    toast.dismiss();
-    const id = toast.loading("...Loggin in");
-
-    const parseData = loginValidation.safeParse(formData);
-
-    if (!parseData.success) {
-      toast.error("Invalid credentials", {
-        id: id,
-      });
-
-      setIsSubmitting(false);
-      
-      return;
-    }
-
-    try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (result?.error) {
-        throw new Error(result?.error);
-      }
-
-      if (result?.ok) {
-        toast.success("Logged in Successfully", {
-          id: id,
-        });
-
-        router.push("/dashboard");
-      }
-      
-    } catch (error) {
-      const err = (error as Error).message || "something went wrong.";
-      toast.error(err, {
-        id: id,
-      });
-      
-      console.log(error)
-
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simulate login process
+    setTimeout(() => {
+      setLoading(false);
+      toast("Login Successful");
+    }, 1500);
   };
 
   return (
-    <AuthLayout 
-      title="Welcome Back" 
-      subtitle="Sign in to access your account"
-      authType="signin"
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <FormInput
-          id="email"
-          name="email"
-          label="Email Address"
-          type="email"
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          error={errors.email}
-          icon={<Mail size={18} />}
-          required
-        />
-
-        <FormInput
-          id="password"
-          name="password"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          value={formData.password}
-          onChange={handleChange}
-          error={errors.password}
-          icon={<Lock size={18} />}
-          required
-        />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <input
-              id="rememberMe"
-              name="rememberMe"
-              type="checkbox"
-              className="h-4 w-4 rounded border-input bg-background focus:ring-primary"
-              checked={formData.rememberMe}
-              onChange={handleChange}
-            />
-            <label htmlFor="rememberMe" className="text-sm text-foreground/70">
-              Remember me
-            </label>
-          </div>
-          <Link
-            href="/auth/forgot-password"
-            className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
         >
-          {isSubmitting ? (
-            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          ) : (
-            "Sign in"
-          )}
-        </button>
-
-        <div className="relative mt-6">
-          <div className="absolute inset-0 flex items-center flex-col">
-            <div className="w-full border-t border-border"></div>
-            <div className="w-full"></div>
+          <div className="text-center mb-8">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6"
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Back to Home
+            </Link>
+            <div className="mx-auto w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white dark:text-black mb-4">
+              <LockIcon className="h-5 w-5" />
+            </div>
+            <h1 className="text-2xl font-display font-bold">Log in to HostelSphere</h1>
+            <p className="text-muted-foreground mt-2">
+              Access your account to manage hostel operations
+            </p>
           </div>
-        </div>
-      </form>
-    </AuthLayout>
-  );
-};
 
-export default Signin;
+          <Tabs 
+            defaultValue="student" 
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid grid-cols-3 mb-8">
+              <TabsTrigger value="student">Student</TabsTrigger>
+              <TabsTrigger value="warden">Warden</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+            </TabsList>
+
+            {["student", "warden", "admin"].map((role) => (
+              <TabsContent key={role} value={role}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {role.charAt(0).toUpperCase() + role.slice(1)} Login
+                    </CardTitle>
+                    <CardDescription>
+                      {role === "student" 
+                        ? "Enter your credentials to access your student account" 
+                        : `Enter your credentials to access your ${role} account`}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`${role}-email`}>Email</Label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <MailIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <Input
+                            id={`${role}-email`}
+                            placeholder="Enter your email"
+                            type="email"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor={`${role}-password`}>Password</Label>
+                          <Link 
+                            href="/auth/forgot-password" 
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <LockIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <Input
+                            id={`${role}-password`}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            className="pl-10 pr-10"
+                            required
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="text-muted-foreground hover:text-primary"
+                            >
+                              {showPassword ? (
+                                <EyeOffIcon className="h-4 w-4" />
+                              ) : (
+                                <EyeIcon className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full mt-6" 
+                        type="submit" 
+                        disabled={loading}
+                      >
+                        {loading ? "Signing in..." : "Sign in"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                  <CardFooter className="flex justify-center">
+                    {role === "student" ? (
+                      <p className="text-sm text-muted-foreground">
+                        Don't have an account?{" "}
+                        <Link href="/auth/signup" className="text-primary hover:underline">
+                          Sign up
+                        </Link>
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Need a {role} account?{" "}
+                        <Link href="/auth/admin-warden-register" className="text-primary hover:underline">
+                          Request access
+                        </Link>
+                      </p>
+                    )}
+                  </CardFooter>
+                </Card>
+              </TabsContent>
+            ))}
+          </Tabs>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

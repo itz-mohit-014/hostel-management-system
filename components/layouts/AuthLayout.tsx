@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import ThemeToggleBtn from "../theme-toggle-btn";
 import Link from "next/link";
 import { Building2 } from "lucide-react";
 
@@ -33,18 +32,8 @@ const AuthLayout = ({
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-secondary/10 blur-3xl opacity-50" />
       </div>
 
-      <header className="py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-        <Link href="/" className="flex items-center">
-          <h1 className="text-xl font-serif font-semibold">
-            <span className="heading-gradient">Hostel</span>
-            <span className="text-primary dark:text-primary">Haven</span>
-          </h1>
-        </Link>
-        <ThemeToggleBtn />
-      </header>
-
       <main className="flex-1 grid lg:grid-cols-2">
-        <div className="hidden lg:block bg-muted" />
+        <div className="hidden lg:block" />
         <div className="flex items-center justify-center p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-md">
             <div className="text-center mb-8 animate-fade">

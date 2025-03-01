@@ -2,6 +2,14 @@
 import { useState } from "react";
 import { ChevronUp } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { 
+  Facebook, 
+  Twitter, 
+  Instagram, 
+  Linkedin
+} from "lucide-react";
+
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -21,9 +29,9 @@ const Footer = () => {
 
   return (
     <footer className="bg-background border-t border-border">
-      <div className="container mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
+      <div className="container mx-auto px-4 sm:px-6 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center mb-4">
               <h1 className="text-xl font-serif font-semibold">
                 <span className="heading-gradient">Hostel</span>
@@ -31,8 +39,22 @@ const Footer = () => {
               </h1>
             </Link>
             <p className="text-foreground/80 mb-4">
-              Transforming hostel management with elegant technology solutions.
+            A comprehensive hostel management system designed to streamline administrative processes and enhance student experiences.
             </p>
+            <div className="flex space-x-4">
+              <Link href={"#"} className="h-8 w-8 rounded-full hover:bg-black/15 hover:dark:bg-white/15 dark:bg-white/5 flex items-center justify-center transition-all">
+                <Facebook size={16} className="text-muted-foreground hover:text-primary transition-colors" />
+              </Link>
+              <Link href={"#"} className="h-8 w-8 rounded-full hover:bg-black/15 hover:dark:bg-white/15 dark:bg-white/5 flex items-center justify-center transition-all">
+                <Twitter size={16} className="text-muted-foreground hover:text-primary transition-colors" />
+              </Link>
+              <Link href={"#"} className="h-8 w-8 rounded-full hover:bg-black/15 hover:dark:bg-white/15 dark:bg-white/5 flex items-center justify-center transition-all">
+                <Instagram size={16} className="text-muted-foreground hover:text-primary transition-colors" />
+              </Link>
+              <Link href={"#"} className="h-8 w-8 rounded-full hover:bg-black/15 hover:dark:bg-white/15 dark:bg-white/5 flex items-center justify-center transition-all">
+                <Linkedin size={16} className="text-muted-foreground hover:text-primary transition-colors" />
+              </Link>
+            </div>
           </div>
 
           <div>
@@ -109,25 +131,12 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-10 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-foreground/70 text-sm mb-4 md:mb-0">
+        <div className="border-t border-border mt-10 pt-4 text-center">
+          <p className="text-muted-foreground text-sm">
             &copy; {new Date().getFullYear()} HostelHaven. All rights reserved.
           </p>
-          <div className="flex items-center space-x-4">
-            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
-              Twitter
-            </Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
-              LinkedIn
-            </Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
-              Facebook
-            </Link>
-            <Link href="#" className="text-foreground/80 hover:text-foreground transition-colors">
-              Instagram
-            </Link>
-          </div>
         </div>
+
       </div>
 
       <button

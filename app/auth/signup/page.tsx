@@ -1,306 +1,195 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { Mail, Lock, User, Github, Twitter } from "lucide-react";
-import AuthLayout from "@/components/layouts/AuthLayout";
-import FormInput from "@/components/ui/FormInput";
-import SocialButton from "@/components/SocialButton";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ChevronLeft, EyeIcon, EyeOffIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { passwordRegex, registerSchema } from "@/common/types";
-import { parseEnv } from "util";
-import { string } from "zod";
-import axios from "axios";
+import Link from "next/link";
 
-interface SignUpFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  acceptTerms: boolean;
-}
+export default function Register() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-interface FormErrors {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  acceptTerms?: string;
-}
-
-const SignUp = () => {
-  const [formData, setFormData] = useState<SignUpFormData>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    acceptTerms: false,
-  });
-  
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const router = useRouter();
-
-  const validateForm = (toastId:string): boolean => {
-    const newErrors: FormErrors = {};
-    let isValid = true;
-
-    const parseData = registerSchema.safeParse(formData);
-
-    console.log(parseData);
-
-      if (!parseData.success) {
-
-        parseData.error.issues.map((issue) => {
-          // @ts-ignore
-          newErrors[issue.path[0]] = issue.message;
-          isValid = false;
-        })
-
-      }
-
-      if(formData.password !== formData.confirmPassword){
-        newErrors.confirmPassword = "password is not match";
-        isValid = false;
-      }
-
-      const lastErrorMessage = Object.values(newErrors).slice(-1)[0];
-      
-      if(lastErrorMessage){
-        toast.dismiss();
-        toast.error(lastErrorMessage, { id: toastId});
-      }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-    
-    // Clear error when user types
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: undefined,
-      }));
-    }
-  };
-
-  // const registerHandler = async (data:SignUpFormData) => {
-  //   const id = toast.loading("Sending OTP...");
-    
-
-  //   try {
-  //     const parseData = registerSchema.safeParse(data);
-
-  //     if (!parseData.success) {
-  //       toast.error("Please enter valid data", {
-  //         id: id,
-  //       });
-  //       return;
-  //     }
-
-  //     if (formData.password !== formData.confirmPassword) {
-  //       newErrors.confirmPassword = "Passwords do not match";
-  //       isValid = false;
-  //     }
-
-  //     localStorage.setItem("userData", JSON.stringify(parseData.data));
-
-  //     const otpData = {
-  //       email: parseData.data.email,
-  //     };
-
-  //     const generateOtp = await axios.post("/api/auth/otp", otpData);
-
-  //     if(generateOtp.data.success){
-  //       toast.success(generateOtp.data.message,{
-  //         id:id
-  //       })
-  //       router.push('/auth/otp')
-  //     }
-      
-  //     router.push('/auth/otp')
-
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       toast.error(error.response?.data?.message || "Something went wrong", {
-  //         id: id,
-  //       });
-  //     } else {
-  //       toast.error("Something went wrong", {
-  //         id: id,
-  //       });
-  //     }
-  //   }
-  // };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const toastId = toast.loading("Sending OTP...");
+    setLoading(true);
     
-    if (!validateForm(toastId)) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-
-      localStorage.setItem("userData", JSON.stringify(formData));
-
-      const otpData = {
-        email: formData.email,
-      };
-
-      const generateOtp = await axios.post("/api/auth/otp", otpData);
-
-      if(generateOtp.data.success){
-
-        toast.success(generateOtp.data.message,{
-          id:toastId
-        })
-
-        router.push('/auth/otp')
-      }
-      
-    } catch (error) {
-      
-      if (axios.isAxiosError(error)) {
-        
-        toast.error(error.response?.data?.message || "Something went wrong", {
-          id: toastId,
-        });
-
-      } else {
-        
-        toast.error("Something went wrong", {
-          id: toastId,
-        });
-
-      }
-      
-    } finally {
-
-      setIsSubmitting(false);
-    }
+    // Simulate registration process
+    setTimeout(() => {
+      setLoading(false);
+      toast("Registration Successful");
+    }, 1500);
   };
-
-  useEffect(() => {
-    localStorage.removeItem("userData");
-  }, [])
 
   return (
-    <AuthLayout 
-      title="Create an Account" 
-      subtitle="Enter your information to create your account"
-      authType="signup"
-    >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <FormInput
-          id="name"
-          name="name"
-          label="Full Name"
-          type="text"
-          autoComplete="name"
-          value={formData.name}
-          onChange={handleChange}
-          error={errors.name}
-          icon={<User size={18} />}
-          required
-        />
-
-        <FormInput
-          id="email"
-          name="email"
-          label="Email Address"
-          type="email"
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          error={errors.email}
-          icon={<Mail size={18} />}
-          required
-        />
-
-        <FormInput
-          id="password"
-          name="password"
-          label="Password"
-          type="password"
-          autoComplete="new-password"
-          value={formData.password}
-          onChange={handleChange}
-          error={errors.password}
-          icon={<Lock size={18} />}
-          required
-        />
-
-        <FormInput
-          id="confirmPassword"
-          name="confirmPassword"
-          label="Confirm Password"
-          type="password"
-          autoComplete="new-password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          error={errors.confirmPassword}
-          icon={<Lock size={18} />}
-          required
-        />
-
-        <div className="flex items-start space-x-2">
-          <input
-            id="acceptTerms"
-            name="acceptTerms"
-            type="checkbox"
-            className="h-4 w-4 mt-1 rounded border-input bg-background focus:ring-primary"
-            checked={formData.acceptTerms}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="acceptTerms" className="text-sm text-foreground/70">
-            I agree to the{" "}
-            <a href="#" className="text-primary hover:text-primary/80 transition-colors">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" className="text-primary hover:text-primary/80 transition-colors">
-              Privacy Policy
-            </a>
-          </label>
-        </div>
-        {errors.acceptTerms && (
-          <p className="text-destructive text-xs mt-1">{errors.acceptTerms}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 shadow transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
         >
-          {isSubmitting ? (
-            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          ) : (
-            "Create Account"
-          )}
-        </button>
-
-        <div className="relative mt-6">
-          <div className="absolute inset-0 flex items-center flex-col">
-            <div className="w-full border-t border-border"></div>
-            <div className="w-full"></div>
+          <div className="text-center mb-8">
+            <Link 
+              href="/" 
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6"
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              Back to Home
+            </Link>
+            <div className="mx-auto w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white dark:text-black mb-4">
+              <UserIcon className="h-5 w-5" />
+            </div>
+            <h1 className="text-2xl font-display font-bold">Create your student account</h1>
+            <p className="text-muted-foreground mt-2">
+              Join HostelSphere as a student
+            </p>
           </div>
-        </div>
 
-      </form>
-    </AuthLayout>
+          <Card>
+            <CardHeader>
+              <CardTitle>Student Registration</CardTitle>
+              <CardDescription>
+                Create a new student account to access HostelSphere
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstname">First Name</Label>
+                    <Input
+                      id="firstname"
+                      placeholder="Enter first name"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastname">Last Name</Label>
+                    <Input
+                      id="lastname"
+                      placeholder="Enter last name"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <MailIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <Input
+                      id="email"
+                      placeholder="Enter your email"
+                      type="email"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="student-id">Student ID</Label>
+                  <Input
+                    id="student-id"
+                    placeholder="Enter your student ID"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="course">Course/Program</Label>
+                  <Select>
+                    <SelectTrigger id="course">
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cse">Computer Science</SelectItem>
+                      <SelectItem value="ece">Electronics Engineering</SelectItem>
+                      <SelectItem value="mech">Mechanical Engineering</SelectItem>
+                      <SelectItem value="civil">Civil Engineering</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <LockIcon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        {showPassword ? (
+                          <EyeOffIcon className="h-4 w-4" />
+                        ) : (
+                          <EyeIcon className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox id="terms" required />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    I agree to the{" "}
+                    <Link href="/terms" className="text-primary hover:underline">
+                      terms of service
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" className="text-primary hover:underline">
+                      privacy policy
+                    </Link>
+                  </label>
+                </div>
+                
+                <Button 
+                  className="w-full mt-6" 
+                  type="submit" 
+                  disabled={loading}
+                >
+                  {loading ? "Creating account..." : "Create student account"}
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="flex justify-center">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link href="/auth/signin" className="text-primary hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </motion.div>
+      </div>
+    </div>
   );
-};
-
-export default SignUp;
+}
