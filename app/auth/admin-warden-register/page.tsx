@@ -40,46 +40,27 @@ import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import zod from "zod";
+import { AdminRegisterSchema } from "@/common/types";
+import FormInput from "@/components/ui/FormInput";
 
-const adminSchema = zod
-  .object({
-    // role: zod.enum(["warden", "administrator"]),
-    firstName: zod.string({ message: "First name can't be empty" }),
-    lastName: zod.string({ message: "Last name can't be empty" }),
-    email: zod.string().email("Please enter a valid email address"),
-    password: zod.string().min(8, "Password must be at least 8 characters"),
-    staffId: zod.string({ message: "Staff ID can't be empty" }),
-    department: zod.string({ message: "Department can't be empty" }),
-    reasonForAccess: zod.string({
-      message: "Please describe reason for access shortly",
-    })
-  })
-
-  // assignHostel: zod
-  //   .enum([
-  //     "boys hostel a",
-  //     "boys hostel b",
-  //     "girls hostel a",
-  //     "girls hostel b",
-  //   ])
-  //   .optional(),
-
-type AdminFromValues = zod.infer<typeof adminSchema>;
+type AdminFromValues = zod.infer<typeof AdminRegisterSchema>;
 
 export default function AdminWardenRegister() {
-  const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [role, setRole] = useState("warden");
-  const [hostel, setHostel] = useState("");
+  const [hostel, setHostel] = useState("boys-hostel-a");
 
   const {
     register,
     formState: { errors },
     handleSubmit,
-    getValues
+    getValues,
+    setValue,
+    resetField
   } = useForm<AdminFromValues>({
-    resolver: zodResolver(adminSchema),
+    resolver: zodResolver(AdminRegisterSchema),
     defaultValues: {
       email: "",
       firstName: "",
@@ -94,19 +75,7 @@ export default function AdminWardenRegister() {
   const router = useRouter();
 
   const submitRegistration = (data:AdminFromValues) => {
-    // e.preventDefault();
-    // setLoading(true);
-    
-console.log(data)
-console.log(role , hostel)
-console.log(getValues());
-console.log(errors)
-    // Simulate registration and verification request
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   setSubmitted(true);
-    //   toast("Registration Submitted");
-    // }, 1500);
+    console.log(data)
   };
 
   if (submitted) {
@@ -175,6 +144,17 @@ console.log(errors)
     );
   }
 
+  const handleChangeRole = (name:any, value: any) => {
+    if(name === "role") setRole(value);
+
+    if(value == "administrator") {
+      setValue("role", value); 
+      resetField("assignHostel")
+    }else{
+      setValue(name, value); 
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex items-center justify-center p-6">
@@ -216,9 +196,8 @@ console.log(errors)
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <Label htmlFor="account-type">Role</Label>
-                  <Select defaultValue="warden" onValueChange={(value) => setRole(value)}>
-                    <SelectTrigger id="account-type">
+                  <Select onValueChange={(value) => handleChangeRole("role", value)}>
+                    <SelectTrigger id="role" >
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -235,108 +214,61 @@ console.log(errors)
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstname">First Name</Label>
-                    <Input
-                      id="firstname"
-                      placeholder="Enter first name"
+                    <FormInput
+                      id="firstName"
+                      label="First Name"
+                      type="text"
                       {...register("firstName")}
+                      error={errors.firstName?.message}
                       required
                     />
-                    {errors.firstName && (
-                      <p className="text-red-500 text-xs">
-                        {errors.firstName.message}
-                      </p>
-                    )}
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="lastname">Last Name</Label>
-                    <Input
-                      id="lastname"
-                      placeholder="Enter last name"
+                    <FormInput
+                      id="lastName"
+                      label="Last Name"
+                      type="text"
                       {...register("lastName")}
+                      error={errors.lastName?.message}
                       required
                     />
-                    {errors.lastName && (
-                      <p className="text-red-500 text-xs">
-                        {errors.lastName.message}
-                      </p>
-                    )}
-                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <MailIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      id="email"
-                      placeholder="Enter your email"
-                      type="email"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                      className="pl-10"
-                      {...register("email")}
-                      required
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="text-red-500 text-xs">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
+                <FormInput
+                  id="email"
+                  label="Email"
+                  type="email"
+                  icon={<MailIcon size={18} />}
+                  error={errors.email?.message}
+                  {...register("email")}
+                  required
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="staff-id">Staff ID</Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <IdCardIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      id="staff-id"
-                      placeholder="Enter your staff ID"
-                      className="pl-10"
-                      {...register("staffId")}
-                      required
-                    />
-                  </div>
-                  {errors.staffId && (
-                    <p className="text-red-500 text-xs">
-                      {errors.staffId.message}
-                    </p>
-                  )}
-                </div>
+                <FormInput
+                  id="staffId"
+                  label="Staff Id"
+                  type="text"
+                  autoComplete="name"
+                  {...register("staffId")}
+                  error={errors.staffId?.message}
+                  icon={<IdCardIcon size={18} />}
+                  required
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="department">Department</Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <BuildingIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      id="department"
-                      placeholder="Enter your department"
-                      className="pl-10"
-                      {...register("department")}
-                      required
-                    />
-                  </div>
-                  {errors.department && (
-                    <p className="text-red-500 text-xs">
-                      {errors.department.message}
-                    </p>
-                  )}
-                </div>
+                <FormInput
+                  id="department"
+                  label="Department"
+                  type="text"
+                  autoComplete="name"
+                  {...register("department")}
+                  error={errors.department?.message}
+                  icon={<IdCardIcon size={18} />}
+                  required
+                />
 
                 {role === "warden" && (
                   <div className="space-y-2">
-                    <Label htmlFor="hostel">Assigned Hostel</Label>
-                    <Select defaultValue="boys-hostel-a" onValueChange={(value) => setHostel(value)}>
-                      <SelectTrigger id="hostel">
+                    <Select onValueChange={( value:any ) => handleChangeRole("assignHostel", value )}>
+                      <SelectTrigger id="assignHostel">
                         <SelectValue placeholder="Select hostel" />
                       </SelectTrigger>
                       <SelectContent>
@@ -362,40 +294,16 @@ console.log(errors)
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <LockIcon className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      className="pl-10 pr-10"
-                      {...register("password")}
-                      required
-                    />
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        {showPassword ? (
-                          <EyeOffIcon className="h-4 w-4" />
-                        ) : (
-                          <EyeIcon className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-xs">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
+                <FormInput
+                  id="password"
+                  label="Password"
+                  type="password"
+                  autoComplete="current-password"
+                  icon={<LockIcon size={18} />}
+                  error={errors.password?.message}
+                  {...register("password")}
+                  required
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="reason">Reason for Access</Label>
@@ -424,7 +332,7 @@ console.log(errors)
                 </div>
 
                 <Alert className="bg-amber-50 border-amber-200">
-                  <InfoIcon className="h-4 w-4 text-amber-500" />
+                  <InfoIcon className="h-4 w-4 text-amber-500 dark:text-amber-900" />
                   <AlertTitle className="text-amber-800">
                     Account Verification Required
                   </AlertTitle>

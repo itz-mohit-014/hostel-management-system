@@ -6,7 +6,7 @@ import AuthLayout from "@/components/layouts/AuthLayout";
 import FormInput from "@/components/ui/FormInput";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { registerSchema } from "@/common/types";
+import { studentRegisterSchema } from "@/common/types";
 import axios from "axios";
 
 interface SignUpFormData {
@@ -43,7 +43,7 @@ const SignUp = () => {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    const parseData = registerSchema.safeParse(formData);
+    const parseData = studentRegisterSchema.safeParse(formData);
 
     console.log(parseData);
 

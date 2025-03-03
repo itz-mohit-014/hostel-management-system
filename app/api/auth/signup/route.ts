@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { registerSchema } from '@/common/types';
+import { passwordRegex, studentRegisterSchema } from '@/common/types';
 import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export  const POST = async (req:NextRequest) => {
     const data = await req.json()
-    const parseData = registerSchema.safeParse(data.userData);
+    const parseData = studentRegisterSchema.safeParse(data.userData);
 
     if(!parseData || !parseData.success){
         return NextResponse.json({
@@ -33,12 +33,11 @@ export  const POST = async (req:NextRequest) => {
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashPassword = bcrypt.hashSync(parseData.data.password, salt);
 
+        delete parseData.data.acceptTerms;
+        parseData.data.password = hashPassword;
+
         const createUser = await prisma.user.create({
-            data:{
-                name:parseData.data.name,
-                email:parseData.data.email,
-                password:hashPassword,
-            }
+            data:parseData.data
         })  
 
         if(!createUser.id){

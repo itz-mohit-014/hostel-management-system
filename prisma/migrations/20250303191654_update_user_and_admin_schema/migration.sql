@@ -2,20 +2,34 @@
 CREATE TYPE "Status" AS ENUM ('resolved', 'pending', 'reject');
 
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('Warden', 'Admin');
+CREATE TYPE "Role" AS ENUM ('Warden', 'Admin', 'Student');
 
--- DropIndex
-DROP INDEX "User_email_key";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "studentId" TEXT NOT NULL,
+    "courseName" TEXT NOT NULL,
+    "otherCourseName" TEXT,
+    "registrationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "role" "Role" NOT NULL DEFAULT 'Student',
 
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "registrationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "staffId" TEXT NOT NULL,
+    "department" TEXT NOT NULL,
+    "reasonForAccess" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'Warden',
 
     CONSTRAINT "Admin_pkey" PRIMARY KEY ("id")
@@ -65,12 +79,24 @@ CREATE TABLE "Notice" (
 );
 
 -- CreateTable
+CREATE TABLE "Otp" (
+    "id" TEXT NOT NULL,
+    "otp" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "email" TEXT NOT NULL,
+
+    CONSTRAINT "Otp_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Hostel" (
     "id" SERIAL NOT NULL,
     "hostelName" TEXT NOT NULL,
     "roomCount" INTEGER NOT NULL,
     "roomOccoupied" INTEGER NOT NULL DEFAULT 0,
-    "managedBy" TEXT NOT NULL,
+    "adminId" TEXT NOT NULL,
+    "managedBy" TEXT,
 
     CONSTRAINT "Hostel_pkey" PRIMARY KEY ("id")
 );
@@ -104,9 +130,9 @@ CREATE TABLE "Outing" (
     "returnDate" TIMESTAMP(3) NOT NULL,
     "outingPurpose" VARCHAR(300) NOT NULL,
     "approvalStatus" "Status" NOT NULL DEFAULT 'pending',
-    "approverId" TEXT NOT NULL,
-    "checkOutTime" TIMESTAMP(3) NOT NULL,
-    "securitySignature" TEXT NOT NULL,
+    "approverId" TEXT,
+    "checkOutTime" TIMESTAMP(3),
+    "securitySignature" TEXT,
 
     CONSTRAINT "Outing_pkey" PRIMARY KEY ("id")
 );
@@ -133,7 +159,7 @@ ALTER TABLE "Complaint" ADD CONSTRAINT "Complaint_userId_fkey" FOREIGN KEY ("use
 ALTER TABLE "Notice" ADD CONSTRAINT "Notice_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Hostel" ADD CONSTRAINT "Hostel_managedBy_fkey" FOREIGN KEY ("managedBy") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Hostel" ADD CONSTRAINT "Hostel_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Room" ADD CONSTRAINT "Room_hostelId_fkey" FOREIGN KEY ("hostelId") REFERENCES "Hostel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

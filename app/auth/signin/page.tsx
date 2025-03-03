@@ -1,30 +1,121 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, EyeIcon, EyeOffIcon, LockIcon, MailIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+} from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import FormInput from "@/components/ui/FormInput";
+import { useRouter } from "next/navigation";
+import { loginValidation } from "@/common/types";
+import { signIn } from "next-auth/react";
+
+type SigninFormData = Zod.infer<typeof loginValidation>;
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+}
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("student");
+  const [formData, setFormData] = useState<SigninFormData>({
+    email: "",
+    password: "",
+    accountType: "student",
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
+
+  const registerUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    
-    // Simulate login process
-    setTimeout(() => {
-      setLoading(false);
-      toast("Login Successful");
-    }, 1500);
+
+    setIsSubmitting(true);
+
+    toast.dismiss();
+    const id = toast.loading("Loggin...");
+
+    const parseData = loginValidation.safeParse(formData);
+
+    if (!parseData.success) {
+      console.log(parseData)
+      toast.error(
+        parseData.error.issues.slice(-1)[0].message || "Invalid Credentials",
+        {
+          id: id,
+        }
+      );
+
+      setIsSubmitting(false);
+
+      return;
+    }
+
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+        accountType: formData.accountType,
+      });
+
+      if (result?.error) {
+        throw new Error(result?.error);
+      }
+
+      if (result?.ok) {
+        toast.success("Logged in Successfully", {
+          id: id,
+        });
+
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      const err = (error as Error).message || "something went wrong.";
+      toast.error(err, {
+        id: id,
+      });
+
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target ? e.target : e;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
   };
 
   return (
@@ -37,8 +128,8 @@ export default function Login() {
           className="w-full max-w-md"
         >
           <div className="text-center mb-8">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-6"
             >
               <ChevronLeft className="mr-1 h-4 w-4" />
@@ -47,15 +138,20 @@ export default function Login() {
             <div className="mx-auto w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white dark:text-black mb-4">
               <LockIcon className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-display font-bold">Log in to HostelSphere</h1>
+            <h1 className="text-2xl font-display font-bold">
+              Log in to HostelSphere
+            </h1>
             <p className="text-muted-foreground mt-2">
               Access your account to manage hostel operations
             </p>
           </div>
 
-          <Tabs 
-            defaultValue="student" 
-            onValueChange={setActiveTab}
+          <Tabs
+            defaultValue="student"
+            onChange={handleChange}
+            onValueChange={(value) =>
+              handleChange({ name: "accountType", value })
+            }
             className="w-full"
           >
             <TabsList className="grid grid-cols-3 mb-8">
@@ -72,72 +168,56 @@ export default function Login() {
                       {role.charAt(0).toUpperCase() + role.slice(1)} Login
                     </CardTitle>
                     <CardDescription>
-                      {role === "student" 
-                        ? "Enter your credentials to access your student account" 
+                      {role === "student"
+                        ? "Enter your credentials to access your student account"
                         : `Enter your credentials to access your ${role} account`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={registerUser} className="space-y-4">
+                      <FormInput
+                        id="email"
+                        name="email"
+                        label="Email Address"
+                        type="email"
+                        autoComplete="email"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={errors.email}
+                        icon={<MailIcon size={18} />}
+                        required
+                      />
+
                       <div className="space-y-2">
-                        <Label htmlFor={`${role}-email`}>Email</Label>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <MailIcon className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <Input
-                            id={`${role}-email`}
-                            placeholder="Enter your email"
-                            type="email"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            className="pl-10"
-                            required
-                          />
-                        </div>
+                        <FormInput
+                          id={`password`}
+                          label="Password"
+                          type="password"
+                          name="password"
+                          autoComplete="current-password"
+                          icon={<LockIcon size={18} />}
+                          value={formData.password}
+                          onChange={handleChange}
+                          error={errors.password}
+                          required
+                        />
+
+                        <Link
+                          href="/auth/forgot-password"
+                          className="text-xs text-right w-full inline-block text-primary hover:underline"
+                        >
+                          Forgot password?
+                        </Link>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor={`${role}-password`}>Password</Label>
-                          <Link 
-                            href="/auth/forgot-password" 
-                            className="text-xs text-primary hover:underline"
-                          >
-                            Forgot password?
-                          </Link>
-                        </div>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <LockIcon className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <Input
-                            id={`${role}-password`}
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
-                            className="pl-10 pr-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="text-muted-foreground hover:text-primary"
-                            >
-                              {showPassword ? (
-                                <EyeOffIcon className="h-4 w-4" />
-                              ) : (
-                                <EyeIcon className="h-4 w-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <Button 
-                        className="w-full mt-6" 
-                        type="submit" 
-                        disabled={loading}
+
+                      <Button
+                        className="w-full mt-6"
+                        type="submit"
+                        disabled={isSubmitting}
                       >
-                        {loading ? "Signing in..." : "Sign in"}
+                        {isSubmitting ? "Signing in..." : "Sign in"}
                       </Button>
                     </form>
                   </CardContent>
@@ -145,14 +225,20 @@ export default function Login() {
                     {role === "student" ? (
                       <p className="text-sm text-muted-foreground">
                         Don't have an account?{" "}
-                        <Link href="/auth/signup" className="text-primary hover:underline">
+                        <Link
+                          href="/auth/signup"
+                          className="text-primary hover:underline"
+                        >
                           Sign up
                         </Link>
                       </p>
                     ) : (
                       <p className="text-sm text-muted-foreground">
                         Need a {role} account?{" "}
-                        <Link href="/auth/admin-warden-register" className="text-primary hover:underline">
+                        <Link
+                          href="/auth/admin-warden-register"
+                          className="text-primary hover:underline"
+                        >
                           Request access
                         </Link>
                       </p>

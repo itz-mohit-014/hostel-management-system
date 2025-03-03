@@ -15,24 +15,33 @@ datasource db {
 
 model User {
   id               String      @id @default(uuid())
-  name             String
+  firstName        String
+  lastName         String
   email            String
   password         String
+  studentId        String
+  courseName       String
+  otherCourseName  String?
   registrationDate DateTime    @default(now())
   profile          Profile?
   complaint        Complaint[]
   fees             Fees[]
+  role             Role        @default(Student)
 }
 
 model Admin {
-  id       String   @id @default(uuid())
-  name     String
-  email    String
-  password String
-  role     Role     @default(Warden)
-  profile  Profile?
-  notice   Notice[]
-  hostel   Hostel[]
+  id              String   @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String
+  password        String
+  staffId         String
+  department      String
+  reasonForAccess String
+  role            Role     @default(Warden)
+  profile         Profile?
+  notice          Notice[]
+  hostel          Hostel[]
 }
 
 model Profile {
@@ -133,4 +142,5 @@ enum Status {
 enum Role {
   Warden
   Admin
+  Student
 }

@@ -33,38 +33,29 @@ export default function OTPInput() {
 
   const router = useRouter();
 
-  // Handle input change
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
     const value = e.target.value;
 
-    // Only accept numbers
     if (!/^\d*$/.test(value)) return;
-
-    // Take the last character if multiple characters are entered
     const digit = value.slice(-1);
 
-    // Update the OTP array
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    // Move to next input if a digit was entered
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // Handle key press
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
-    // Move to previous input on backspace if current input is empty
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
 
-    // Handle arrow keys for navigation
     if (e.key === "ArrowLeft" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -177,13 +168,12 @@ export default function OTPInput() {
                 </CardTitle>
                 <CardDescription>
                   <p className="text-center">
-                  We have sent a code to your email
-                  <span className=" font-semibold ml-1">
-                    {" "}
-                    {tempUser.email.slice(0, 2)}**@
-                    {tempUser.email.split("@")[1]}
-                  </span>
-
+                    We have sent a code to your email
+                    <span className=" font-semibold ml-1">
+                      {" "}
+                      {tempUser.email.slice(0, 2)}**@
+                      {tempUser.email.split("@")[1]}
+                    </span>
                   </p>
                 </CardDescription>
               </div>

@@ -24,14 +24,9 @@ const Navbar = () => {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        isScrolled ? "py-3 shadow-sm dakr:bg-black/90 bg-white/80" : "py-5 bg-transparent"
+        isScrolled ? "py-3 shadow-sm dark:bg-black/90 bg-white/80" : "py-5 bg-transparent"
       }`}
     >
-    {/* <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        !isScrolled ? "py-3 glass glass-dark shadow-sm" : "py-5 bg-transparent"
-      }`}
-    > */}
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center">
           <h1 className="text-xl font-serif font-semibold">
