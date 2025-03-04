@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { JWT } from "next-auth/jwt";
 import { loginValidation } from "@/common/types";
+import { CustomError } from "@/lib/Error";
 
 export const nextOptions: NextAuthOptions = {
   providers: [
@@ -28,19 +29,29 @@ export const nextOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
+        console.log(credentials)
         if (!loginValidation.safeParse(credentials).success) {
           return null;
         }
-
+        let user;
         try {
-          const user = await prisma.user.findFirst({
-            where: {
-              email: credentials?.email,
-            },
-          });
+          if(credentials?.accountType === "student"){
+             user = await prisma.user.findFirst({
+              where: {
+                email: credentials?.email,
+              },
+            });
+          }else {
+             user = await prisma.admin.findFirst({
+              where: {
+                email: credentials?.email,
+              },
+            });
+          }
+          
 
           if (!user || !user.id) {
-            throw new Error("User not found");
+           throw new CustomError("User not found", false, 404)
           }
 
           const validPassword = await bcrypt.compare(
@@ -55,7 +66,8 @@ export const nextOptions: NextAuthOptions = {
           const newUser = {
             email: user.email,
             id: user.id,
-            name: user.name,
+            firstName: user.firstName,
+            lastName:user.lastName,
             accountType : user.role
           };
 
