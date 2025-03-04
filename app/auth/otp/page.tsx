@@ -113,6 +113,8 @@ export default function OTPInput() {
         router.push("/auth/signin");
       }
     } catch (error) {
+      localStorage.removeItem("userData");
+
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || "Something went wrong", {
           id: toastId,
@@ -122,6 +124,7 @@ export default function OTPInput() {
           id: toastId,
         });
       }
+      
     }
   };
 

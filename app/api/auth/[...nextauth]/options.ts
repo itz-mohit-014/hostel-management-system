@@ -22,36 +22,44 @@ export const nextOptions: NextAuthOptions = {
           type: "password",
           placeholder: "password",
         },
-        accountType: {
-          label: "Password",
+        role: {
+          label: "role",
           type: "text",
           placeholder: "account type",
         },
       },
       async authorize(credentials, req) {
+
         console.log(credentials)
+        
         if (!loginValidation.safeParse(credentials).success) {
           return null;
         }
+
         let user;
+
         try {
-          if(credentials?.accountType === "student"){
-             user = await prisma.user.findFirst({
+          if (credentials?.role === "Student") {
+            user = await prisma.user.findFirst({
               where: {
                 email: credentials?.email,
+                role: "Student",
               },
             });
-          }else {
-             user = await prisma.admin.findFirst({
+          } else if (
+            credentials?.role === "Admin" ||
+            credentials?.role === "Warden"
+          ) {
+            user = await prisma.admin.findFirst({
               where: {
                 email: credentials?.email,
+                role: credentials?.role!,
               },
             });
           }
-          
 
           if (!user || !user.id) {
-           throw new CustomError("User not found", false, 404)
+            throw new CustomError("User not found", false, 404);
           }
 
           const validPassword = await bcrypt.compare(
@@ -64,11 +72,11 @@ export const nextOptions: NextAuthOptions = {
           }
 
           const newUser = {
-            email: user.email,
             id: user.id,
+            email: user.email,
             firstName: user.firstName,
-            lastName:user.lastName,
-            accountType : user.role
+            lastName: user.lastName,
+            accountType: user.role,
           };
 
           return newUser;

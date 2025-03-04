@@ -110,11 +110,9 @@ export default function AdminWardenRegister() {
     toast.dismiss();
     const toastId = toast.loading("Sending OTP...");
 
-    // if (!validateForm(toastId, data)) return;
+    if (!validateForm(toastId, data)) return;
 
     setLoading(true);
-
-    console.log(data);
 
     try {
       // need to encrupt the data.
@@ -146,6 +144,7 @@ export default function AdminWardenRegister() {
       }
     } finally {
       setLoading(false);
+      
     }
   };
 
@@ -220,7 +219,7 @@ export default function AdminWardenRegister() {
 
     if (value == "administrator") {
       setValue("role", value);
-      resetField("assignHostel");
+      // resetField("assignHostel");
     } else {
       setValue(name, value);
     }
@@ -274,8 +273,8 @@ export default function AdminWardenRegister() {
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="warden">Warden</SelectItem>
-                      <SelectItem value="administrator">
+                      <SelectItem value="Warden">Warden</SelectItem>
+                      <SelectItem value="Admin">
                         Administrator
                       </SelectItem>
                     </SelectContent>
@@ -340,12 +339,13 @@ export default function AdminWardenRegister() {
                   required
                 />
 
-                {role === "warden" && (
+                { /* {role === "Warden" && (
                   <div className="space-y-2">
                     <Select
                       onValueChange={(value: any) =>
                         handleChangeRole("assignHostel", value)
                       }
+                      
                     >
                       <SelectTrigger id="assignHostel">
                         <SelectValue placeholder="Select hostel" />
@@ -371,7 +371,7 @@ export default function AdminWardenRegister() {
                       </p>
                     )}
                   </div>
-                )}
+                )} */ }
 
                 <FormInput
                   id="password"
@@ -429,6 +429,7 @@ export default function AdminWardenRegister() {
                 >
                   {loading ? "Submitting request..." : "Submit for Approval"}
                 </Button>
+                
               </form>
             </CardContent>
             <CardFooter className="flex justify-center">

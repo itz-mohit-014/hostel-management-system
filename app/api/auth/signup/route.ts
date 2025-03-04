@@ -1,92 +1,119 @@
 import { NextRequest, NextResponse } from "next/server"
-import { passwordRegex, studentRegisterSchema } from '@/common/types';
+import { AdminRegisterSchema, passwordRegex, studentRegisterSchema } from '@/common/types';
 import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
 import { CustomError } from "@/lib/Error";
 
+// step 1 : check the user type -> Student | Admin | Warden
+// step 2 : validate the OTP to that user.
+// step 3 : hash the password and save user to db.
+// step 4 : return the response.
 
-export  const POST = async (req:NextRequest) => {
-    const data = await req.json()
-    const parseData = studentRegisterSchema.safeParse(data.userData);
+type ReqData = {
+  userData : Zod.infer<typeof AdminRegisterSchema > | Zod.infer<typeof studentRegisterSchema >;
+  otp : string
+}
 
-    if(!parseData || !parseData.success){
-        return NextResponse.json({
-            message:"Invalid Details"
-        },{
-            status:411
-        })
-    } 
+export const POST = async (req: NextRequest) => {
+    const data : ReqData = await req.json(); // data : { userdata, otp } 
 
+    const parseData =  data.userData.role !== "Student"
+    ? AdminRegisterSchema.safeParse(data.userData)
+    : studentRegisterSchema.safeParse(data.userData) ;
+  
+    if ( !parseData.success ) {
+      return NextResponse.json(
+        {
+          message:
+            parseData.error.issues.slice(-1)[0].message || "Invalid Details",
+        },
+        { status: 400 }
+      );
+    }
+  
     try {
+     
+      const otpRecord = await prisma.otp.findFirst({
+        where: { 
+            email: data.userData.email
+        },
+      });
+  
+      const currentTime = new Date();
+  
+      console.log(otpRecord)
+      console.log(data.otp)
+      
+      if (!otpRecord || otpRecord.otp !== data.otp) {
+        throw new CustomError("Invalid OTP.", false, 403);
+      }
+  
+      if (otpRecord.expiresAt < currentTime) {
+        throw new CustomError("OTP expired", false, 403);
+      }
+      
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
 
-        
-       const Otp = await prisma.otp.findFirst({
-            where:{
-                email: data.userData.email
-            }
+      const hashedPassword = bcrypt.hashSync(parseData.data.password, salt);
+      parseData.data.password = hashedPassword;
+      
+      console.log(parseData.data.role);
+
+      let createdUser ;
+
+      if( parseData.data.role === 'Student' ) { 
+          delete parseData.data.acceptTerms;
+
+        createdUser = await prisma.user.create({
+          data : parseData.data
         })
-
-        const currTime = new Date(Date.now())
-
-        if(!Otp || (Otp.otp !== data.otp)){
-            throw new CustomError("Invalid OTP.", false, 403)
-        }
-
-        if(Otp.expiresAt<currTime){
-            throw new CustomError("Otp expired", false, 403)
-        }
         
-        //delete otp after verification
+      }
 
-        if(Otp.otp === data.otp){
-            await prisma.otp.delete({
-                where:{
-                    id:Otp.id
-                }
-            })
-        }
-
-
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        const hashPassword = bcrypt.hashSync(parseData.data.password, salt);
-
-        delete parseData.data.acceptTerms;
-        parseData.data.password = hashPassword;
-
-        const createUser = await prisma.user.create({
-            data:parseData.data
-        })  
-
-        if(!createUser.id){
-            throw new CustomError("Failed to create User", false, 404)
-        }
-        
-        return NextResponse.json({
-            success:true,
-            message:"User created Successfully"
-        },{
-            status:200
+      if( parseData.data.role === "Admin" || parseData.data.role === "Warden" ) { 
+        createdUser = await prisma.admin.create({
+          data : parseData.data
         })
+      }
+  
+      if (!createdUser?.id) {
+        throw new CustomError("Failed to create User", false, 404);
+      }
+
+       // Delete OTP after successful verification
+      await prisma.otp.delete({
+        where: { id: otpRecord.id },
+      });
+  
+      return NextResponse.json(
+        {
+          success: true,
+          message: "User created Successfully",
+        },
+        { status: 200 }
+      );
 
     } catch (error) {
-        if(error instanceof CustomError){
-            return NextResponse.json({
-                success:error.success,
-                message:error.error
-            },{
-                status:error.status
-            })
-        }else{
-            const err = (error as Error).message
-            return NextResponse.json({
-                success:false,
-                message:err || "Something went wrong"
-            },{
-                status:500
-            })
-        }
-        
-    }    
-}
+      if (error instanceof CustomError) {
+        return NextResponse.json(
+          {
+            success: error.success,
+            message: error.error,
+          },
+          { status: error.status }
+        );
+      } else {
+        const errMessage = (error as Error).message;
+        return NextResponse.json(
+          {
+            success: false,
+            message: errMessage || "Something went wrong",
+          },
+          { status: 500 }
+        );
+      }
+    }
+  };
+  

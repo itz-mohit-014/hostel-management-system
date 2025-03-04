@@ -39,7 +39,7 @@ export default function Login() {
   const [formData, setFormData] = useState<SigninFormData>({
     email: "",
     password: "",
-    accountType: "student",
+    role: "Student",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -47,7 +47,7 @@ export default function Login() {
 
   const router = useRouter();
 
-  const registerUser = async (e: React.FormEvent) => {
+  const signInUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setIsSubmitting(true);
@@ -76,7 +76,7 @@ export default function Login() {
         redirect: false,
         email: formData.email,
         password: formData.password,
-        accountType: formData.accountType,
+        role: formData.role,
       });
 
       if (result?.error) {
@@ -147,20 +147,20 @@ export default function Login() {
           </div>
 
           <Tabs
-            defaultValue="student"
+            defaultValue="Student"
             onChange={handleChange}
             onValueChange={(value) =>
-              handleChange({ name: "accountType", value })
+              handleChange({ name: "role", value })
             }
             className="w-full"
           >
             <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="student">Student</TabsTrigger>
-              <TabsTrigger value="warden">Warden</TabsTrigger>
-              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="Student">Student</TabsTrigger>
+              <TabsTrigger value="Warden">Warden</TabsTrigger>
+              <TabsTrigger value="Admin">Admin</TabsTrigger>
             </TabsList>
 
-            {["student", "warden", "admin"].map((role) => (
+            {["Student", "Warden", "Admin"].map((role) => (
               <TabsContent key={role} value={role}>
                 <Card>
                   <CardHeader>
@@ -168,13 +168,13 @@ export default function Login() {
                       {role.charAt(0).toUpperCase() + role.slice(1)} Login
                     </CardTitle>
                     <CardDescription>
-                      {role === "student"
+                      {role === "Student"
                         ? "Enter your credentials to access your student account"
                         : `Enter your credentials to access your ${role} account`}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={registerUser} className="space-y-4">
+                    <form onSubmit={signInUser} className="space-y-4">
                       <FormInput
                         id="email"
                         name="email"
@@ -222,7 +222,7 @@ export default function Login() {
                     </form>
                   </CardContent>
                   <CardFooter className="flex justify-center">
-                    {role === "student" ? (
+                    {role === "Student" ? (
                       <p className="text-sm text-muted-foreground">
                         Don't have an account?{" "}
                         <Link

@@ -58,6 +58,7 @@ export default function Register() {
     courseName: "",
     otherCourseName: "",
     acceptTerms: false,
+    role:"Student"
   });
 
   const [errors, setErrors] = useState<FormErrors>({});

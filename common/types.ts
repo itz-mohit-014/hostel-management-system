@@ -4,6 +4,7 @@ export const passwordRegex =
 
 export const studentRegisterSchema = z
   .object({
+    role: z.enum(["Student"]),
     firstName: z.string().min(1, { message: "First name is required" }),
     lastName: z.string().min(1, { message: "Last name is required" }),
     email: z.string().email({ message: "Email is not valid." }),
@@ -31,7 +32,7 @@ export const studentRegisterSchema = z
   });
 
 export const AdminRegisterSchema = z.object({
-  role: z.enum(["warden", "administrator"]),
+  role: z.enum(["Warden", "Admin"]),
   firstName: z.string({ message: "first name is required" }),
   lastName: z.string({ message: "First name is required" }),
   email: z.string().email({ message: "email is not valid." }),
@@ -48,19 +49,20 @@ export const AdminRegisterSchema = z.object({
     reasonForAccess: z.string({
       message: "Please describe reason for access shortly",
     }),
-    assignHostel : z.enum(["boys-hostel-a", "boys-hostel-b", "girls-hostel-b", "girls-hostel-b"]).optional()
-}).superRefine((data, ctx) => {
-  if (data.role === "warden" && !data.assignHostel) {
-    ctx.addIssue({
-      path: ["assignHostel"],
-      message: "Please select hostel",
-      code: "custom"
-    });
-  }
-});
+    // assignHostel : z.enum(["boys-hostel-a", "boys-hostel-b", "girls-hostel-b", "girls-hostel-b"]).optional()
+})
+// .superRefine((data, ctx) => {
+//   if (data.role === "Warden" && !data.assignHostel) {
+//     ctx.addIssue({
+//       path: ["assignHostel"],
+//       message: "Please select hostel",
+//       code: "custom"
+//     });
+//   }
+// });
 
 export const loginValidation = z.object({
-  accountType: z.enum(["student", "admin", "warden"]),
+  role: z.enum(["Student", "Admin", "Warden"]),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string(),
 });
