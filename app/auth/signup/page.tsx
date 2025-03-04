@@ -136,6 +136,7 @@ export default function Register() {
       
       const otpData = {
         email: formData.email,
+        role : 'Student'
       };
       
       const generateOtp = await axios.post("/api/auth/otp", otpData);

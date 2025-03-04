@@ -42,11 +42,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import zod from "zod";
 import { AdminRegisterSchema } from "@/common/types";
 import FormInput from "@/components/ui/FormInput";
+import axios from "axios";
 
 type AdminFromValues = zod.infer<typeof AdminRegisterSchema>;
 
 export default function AdminWardenRegister() {
-
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [role, setRole] = useState("warden");
@@ -58,7 +58,8 @@ export default function AdminWardenRegister() {
     handleSubmit,
     getValues,
     setValue,
-    resetField
+    resetField,
+    setError,
   } = useForm<AdminFromValues>({
     resolver: zodResolver(AdminRegisterSchema),
     defaultValues: {
@@ -74,8 +75,78 @@ export default function AdminWardenRegister() {
 
   const router = useRouter();
 
-  const submitRegistration = (data:AdminFromValues) => {
-    console.log(data)
+  const validateForm = (toastId: string, data: AdminFromValues): boolean => {
+    let isValid = true;
+
+    const parseData = AdminRegisterSchema.safeParse(data);
+
+    console.log(parseData);
+
+    if (parseData.success) {
+      return isValid;
+    }
+
+    isValid = false;
+
+    parseData.error.issues.forEach((issue) => {
+      if (issue.path && issue.path.length > 0) {
+        setError(issue.path[0] as keyof AdminFromValues, {
+          type: "manual",
+          message: issue.message,
+        });
+      }
+    });
+
+    const lastErrorMessage = parseData.error.issues.slice(-1)[0]?.message;
+
+    if (lastErrorMessage) {
+      toast.error(lastErrorMessage, { id: toastId });
+    }
+
+    return isValid;
+  };
+
+  const submitRegistration = async (data: AdminFromValues) => {
+    toast.dismiss();
+    const toastId = toast.loading("Sending OTP...");
+
+    // if (!validateForm(toastId, data)) return;
+
+    setLoading(true);
+
+    console.log(data);
+
+    try {
+      // need to encrupt the data.
+      localStorage.setItem("userData", JSON.stringify(data)); // encrupt
+
+      const otpData = {
+        email: data.email,
+        role: data.role,
+      };
+
+      const generateOtp = await axios.post("/api/auth/otp", otpData);
+
+      if (generateOtp.data.success) {
+        toast.success(generateOtp.data.message, {
+          id: toastId,
+        });
+
+        router.push("/auth/otp");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Something went wrong", {
+          id: toastId,
+        });
+      } else {
+        toast.error("Something went wrong", {
+          id: toastId,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -144,16 +215,16 @@ export default function AdminWardenRegister() {
     );
   }
 
-  const handleChangeRole = (name:any, value: any) => {
-    if(name === "role") setRole(value);
+  const handleChangeRole = (name: any, value: any) => {
+    if (name === "role") setRole(value);
 
-    if(value == "administrator") {
-      setValue("role", value); 
-      resetField("assignHostel")
-    }else{
-      setValue(name, value); 
+    if (value == "administrator") {
+      setValue("role", value);
+      resetField("assignHostel");
+    } else {
+      setValue(name, value);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -196,13 +267,17 @@ export default function AdminWardenRegister() {
                 className="space-y-4"
               >
                 <div className="space-y-2">
-                  <Select onValueChange={(value) => handleChangeRole("role", value)}>
-                    <SelectTrigger id="role" >
+                  <Select
+                    onValueChange={(value) => handleChangeRole("role", value)}
+                  >
+                    <SelectTrigger id="role">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="warden">Warden</SelectItem>
-                      <SelectItem value="administrator">Administrator</SelectItem>
+                      <SelectItem value="administrator">
+                        Administrator
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -214,23 +289,23 @@ export default function AdminWardenRegister() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <FormInput
-                      id="firstName"
-                      label="First Name"
-                      type="text"
-                      {...register("firstName")}
-                      error={errors.firstName?.message}
-                      required
-                    />
+                  <FormInput
+                    id="firstName"
+                    label="First Name"
+                    type="text"
+                    {...register("firstName")}
+                    error={errors.firstName?.message}
+                    required
+                  />
 
-                    <FormInput
-                      id="lastName"
-                      label="Last Name"
-                      type="text"
-                      {...register("lastName")}
-                      error={errors.lastName?.message}
-                      required
-                    />
+                  <FormInput
+                    id="lastName"
+                    label="Last Name"
+                    type="text"
+                    {...register("lastName")}
+                    error={errors.lastName?.message}
+                    required
+                  />
                 </div>
 
                 <FormInput
@@ -267,7 +342,11 @@ export default function AdminWardenRegister() {
 
                 {role === "warden" && (
                   <div className="space-y-2">
-                    <Select onValueChange={( value:any ) => handleChangeRole("assignHostel", value )}>
+                    <Select
+                      onValueChange={(value: any) =>
+                        handleChangeRole("assignHostel", value)
+                      }
+                    >
                       <SelectTrigger id="assignHostel">
                         <SelectValue placeholder="Select hostel" />
                       </SelectTrigger>
