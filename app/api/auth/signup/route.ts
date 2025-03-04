@@ -3,6 +3,7 @@ import { passwordRegex, studentRegisterSchema } from '@/common/types';
 import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
+import { CustomError } from "@/lib/Error";
 
 
 export  const POST = async (req:NextRequest) => {
@@ -19,15 +20,33 @@ export  const POST = async (req:NextRequest) => {
 
     try {
 
+        
        const Otp = await prisma.otp.findFirst({
             where:{
                 email: data.userData.email
             }
         })
 
+        const currTime = new Date(Date.now())
+
         if(!Otp || (Otp.otp !== data.otp)){
-            throw new Error("Invalid OTP.")
+            throw new CustomError("Invalid OTP.", false, 403)
         }
+
+        if(Otp.expiresAt<currTime){
+            throw new CustomError("Otp expired", false, 403)
+        }
+        
+        //delete otp after verification
+
+        if(Otp.otp === data.otp){
+            await prisma.otp.delete({
+                where:{
+                    id:Otp.id
+                }
+            })
+        }
+
 
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
@@ -41,7 +60,7 @@ export  const POST = async (req:NextRequest) => {
         })  
 
         if(!createUser.id){
-            throw new Error("Failed to create User")
+            throw new CustomError("Failed to create User", false, 404)
         }
         
         return NextResponse.json({
@@ -52,11 +71,22 @@ export  const POST = async (req:NextRequest) => {
         })
 
     } catch (error) {
-        const err = (error as Error).message
-        return NextResponse.json({
-            message:err
-        },{
-            status:500
-        })
+        if(error instanceof CustomError){
+            return NextResponse.json({
+                success:error.success,
+                message:error.error
+            },{
+                status:error.status
+            })
+        }else{
+            const err = (error as Error).message
+            return NextResponse.json({
+                success:false,
+                message:err || "Something went wrong"
+            },{
+                status:500
+            })
+        }
+        
     }    
 }

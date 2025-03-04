@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { prisma } from "./prisma";
+import { CustomError } from "./Error";
 
 export const mailSender = async (email: string, otp: string) => {
   try {
@@ -56,7 +57,7 @@ export const mailSender = async (email: string, otp: string) => {
                         <p>Hello,</p>
                         <p>Your One-Time Password (OTP) for verification is:</p>
                         <div class="otp-code">${otp}</div>
-                        <p>This OTP is valid for 10 minutes. Do not share this code with anyone.</p>
+                        <p>This OTP is valid for 5 minutes. Do not share this code with anyone.</p>
                         <p>If you didn't request this, please ignore this email.</p>
                         <p class="footer">© 2025 Hostel Management System</p>
                     </div>
@@ -67,11 +68,6 @@ export const mailSender = async (email: string, otp: string) => {
 
     return info;
   } catch (error) {
-    await prisma.otp.deleteMany({
-      where: {
-        email: email,
-      },
-    });
-    throw new Error("Fail to send mail");
+    throw new CustomError("Fail to send mail", false, 403);
   }
 };
