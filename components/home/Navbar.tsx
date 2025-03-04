@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import ThemeToggle from "./theme-toggle-btn";
+import ThemeToggle from "../theme-toggle-btn";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);

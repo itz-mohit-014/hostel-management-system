@@ -1,8 +1,8 @@
 "use client"
 
 import { ReactNode } from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/home/Navbar";
+import Footer from "@/components/home/Footer";
 
 interface LayoutProps {
   children: ReactNode;
