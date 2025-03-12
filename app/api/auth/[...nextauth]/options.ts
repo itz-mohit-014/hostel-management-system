@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { ensureDatabaseConnection, prisma } from "@/lib/prisma";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
@@ -29,8 +29,6 @@ export const nextOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-
-        console.log(credentials)
         
         if (!loginValidation.safeParse(credentials).success) {
           return null;
@@ -39,11 +37,14 @@ export const nextOptions: NextAuthOptions = {
         let user;
 
         try {
+
+          await ensureDatabaseConnection();
+
           if (credentials?.role === "Student") {
             user = await prisma.user.findFirst({
               where: {
                 email: credentials?.email,
-                role: "Student",
+                role: credentials?.role,
               },
             });
           } else if (
@@ -72,15 +73,16 @@ export const nextOptions: NextAuthOptions = {
           }
 
           const newUser = {
-            id: user.id,
+            id : user.id,
             email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            accountType: user.role,
-          };
+            role: user.role
+          }
 
           return newUser;
         } catch (error) {
+
+          console.log(error);
+
           const err = (error as Error).message;
           throw new Error(err);
         }
@@ -98,17 +100,16 @@ export const nextOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.name = user.name;
-        token.accountType = user.accountType;
+        token.role = user.role
       }
       return token;
     },
 
     async session({ session, token }: { session: any; token: JWT }) {
       if (session.user) {
-        (session.user.id = token.id), (session.user.email = token.email);
-        session.user.name = token.name;
-        session.user.accountType = token.accountType;
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.role = token.role;
       }
 
       return session;

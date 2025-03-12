@@ -80,8 +80,6 @@ export default function AdminWardenRegister() {
 
     const parseData = AdminRegisterSchema.safeParse(data);
 
-    console.log(parseData);
-
     if (parseData.success) {
       return isValid;
     }

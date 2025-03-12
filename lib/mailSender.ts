@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { prisma } from "./prisma";
 import { CustomError } from "./Error";
 
 export const mailSender = async (email: string, otp: string) => {

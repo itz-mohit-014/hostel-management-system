@@ -13,8 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { signOut } from "next-auth/react"
+import ThemeToggleBtn from "../theme-toggle-btn"
 
 export function DashboardHeader() {
+
+  const handleLogout = () => {
+    signOut({
+      callbackUrl: "/"
+    })
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <SidebarTrigger />
@@ -29,6 +38,7 @@ export function DashboardHeader() {
         </form>
       </div>
       <div className="flex flex-1 items-center justify-end gap-4 md:gap-2 lg:gap-4">
+        <ThemeToggleBtn/>
         <Button variant="outline" size="icon" className="rounded-full">
           <Bell className="h-4 w-4" />
           <span className="sr-only">Notifications</span>
@@ -53,7 +63,7 @@ export function DashboardHeader() {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

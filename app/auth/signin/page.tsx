@@ -58,7 +58,7 @@ export default function Login() {
     const parseData = loginValidation.safeParse(formData);
 
     if (!parseData.success) {
-      console.log(parseData)
+
       toast.error(
         parseData.error.issues.slice(-1)[0].message || "Invalid Credentials",
         {

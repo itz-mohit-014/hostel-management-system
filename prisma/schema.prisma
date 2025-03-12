@@ -46,7 +46,7 @@ model Admin {
 
 model Profile {
   id             String  @id @default(uuid())
-  contact        Int?
+  contact        String?
   profilePicture String?
   //only students can have room no
   roomNo         Int?
@@ -55,10 +55,10 @@ model Profile {
   //hostel Care only warden gets hostel care
   hostelCare     String?
   department     String?
-  admin          Admin   @relation(fields: [adminId], references: [id])
-  adminId        String  @unique
-  user           User    @relation(fields: [userId], references: [id])
-  userId         String  @unique
+  admin          Admin?   @relation(fields: [adminId], references: [id])
+  adminId        String?  @unique
+  user           User?    @relation(fields: [userId], references: [id])
+  userId         String?  @unique
 }
 
 model Complaint {

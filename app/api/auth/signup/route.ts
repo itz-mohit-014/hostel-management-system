@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { AdminRegisterSchema, passwordRegex, studentRegisterSchema } from '@/common/types';
 import bcrypt from "bcrypt";
 
-import { prisma } from "@/lib/prisma";
+import { ensureDatabaseConnection, prisma } from "@/lib/prisma";
 import { CustomError } from "@/lib/Error";
 
 // step 1 : check the user type -> Student | Admin | Warden
@@ -11,11 +11,17 @@ import { CustomError } from "@/lib/Error";
 // step 4 : return the response.
 
 type ReqData = {
-  userData : Zod.infer<typeof AdminRegisterSchema > | Zod.infer<typeof studentRegisterSchema >;
+  userData : any;
+  // userData : Zod.infer<typeof AdminRegisterSchema > | Zod.infer<typeof studentRegisterSchema > | any;
   otp : string
 }
 
 export const POST = async (req: NextRequest) => {
+
+  try {
+
+    await ensureDatabaseConnection(); 
+
     const data : ReqData = await req.json(); // data : { userdata, otp } 
 
     const parseData =  data.userData.role !== "Student"
@@ -31,8 +37,6 @@ export const POST = async (req: NextRequest) => {
         { status: 400 }
       );
     }
-  
-    try {
      
       const otpRecord = await prisma.otp.findFirst({
         where: { 
@@ -41,10 +45,7 @@ export const POST = async (req: NextRequest) => {
       });
   
       const currentTime = new Date();
-  
-      console.log(otpRecord)
-      console.log(data.otp)
-      
+
       if (!otpRecord || otpRecord.otp !== data.otp) {
         throw new CustomError("Invalid OTP.", false, 403);
       }
@@ -58,23 +59,41 @@ export const POST = async (req: NextRequest) => {
 
       const hashedPassword = bcrypt.hashSync(parseData.data.password, salt);
       parseData.data.password = hashedPassword;
-      
-      console.log(parseData.data.role);
 
       let createdUser ;
-
       if( parseData.data.role === 'Student' ) { 
           delete parseData.data.acceptTerms;
 
         createdUser = await prisma.user.create({
-          data : parseData.data
+          data : {...parseData.data,
+            profile: {
+              create: { department: parseData.data.courseName}
+            },
+            complaint: {
+              create: []
+            },
+            fees: {
+              create: []
+            }
+          }
         })
         
       }
 
       if( parseData.data.role === "Admin" || parseData.data.role === "Warden" ) { 
         createdUser = await prisma.admin.create({
-          data : parseData.data
+          data : {
+            ...parseData.data,
+            profile: {
+              create: { department: parseData.data.department}
+            },
+            notice: {
+              create: []
+            },
+            hostel: {
+              create: []
+            }
+          }
         })
       }
   

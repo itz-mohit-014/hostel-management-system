@@ -1,6 +1,6 @@
 import { CustomError } from "@/lib/Error";
 import { mailSender } from "@/lib/mailSender";
-import { prisma } from "@/lib/prisma";
+import { ensureDatabaseConnection, prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server"
 import otpGenerator from 'otp-generator'
 
@@ -9,6 +9,9 @@ export const POST = async(req:NextRequest)=>{
 
 
     try {
+
+        await ensureDatabaseConnection();
+
         let User;
         if(!data.email){
             throw new CustomError('Invalid Email', false, 403)

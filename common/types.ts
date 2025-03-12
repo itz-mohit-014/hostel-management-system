@@ -2,8 +2,7 @@ import { z } from "zod";
 export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{5,20}$/;
 
-export const studentRegisterSchema = z
-  .object({
+export const studentRegisterSchema = z.object({
     role: z.enum(["Student"]),
     firstName: z.string().min(1, { message: "First name is required" }),
     lastName: z.string().min(1, { message: "Last name is required" }),
@@ -69,7 +68,7 @@ export const loginValidation = z.object({
 
 
 export const profile = z.object({
-  contact: z.number().min(1000000000).max(9999999999),
+  contact: z.string().regex(/^\d{10}$/, "Invalid phone number").optional(),
   roomNo: z.number().optional(),
   hostelName: z.string().optional(),
   departement: z.string().optional(),

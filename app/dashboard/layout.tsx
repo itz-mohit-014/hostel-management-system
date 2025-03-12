@@ -12,10 +12,10 @@ export default function DashboardLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen flex-col">
-        <DashboardHeader />
-        <div className="flex flex-1">
+      <div className="flex min-h-screen w-full relative">
           <DashboardSidebar />
+        <div className="flex flex-col relative flex-1">
+          <DashboardHeader />
           <main className="flex-1 p-6">{children}</main>
         </div>
       </div>

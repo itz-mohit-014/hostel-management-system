@@ -72,8 +72,6 @@ export default function Register() {
 
     const parseData = studentRegisterSchema.safeParse(formData);
 
-    console.log(parseData);
-
     if (!parseData.success) {
       parseData.error.issues.map((issue) => {
         // @ts-ignore
@@ -95,8 +93,7 @@ export default function Register() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement> | any) => {
     const { name, value } = e.target ? e.target : e;
-    console.log(name, value);
-
+    
     if (name === "courseName" && value !== "other") {
       setFormData((prev) => ({
         ...prev,
@@ -129,8 +126,6 @@ export default function Register() {
 
     setIsSubmitting(true);
 
-    console.log(formData);
-
     try {
       // need to encrupt the data.
       localStorage.setItem("userData", JSON.stringify(formData)); 
@@ -150,6 +145,7 @@ export default function Register() {
       }
 
     } catch (error) {
+      console.log(error)
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || "Something went wrong", {
           id: toastId,
