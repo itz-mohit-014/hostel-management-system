@@ -11,16 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ChevronLeft,
-  EyeIcon,
-  EyeOffIcon,
-  LockIcon,
-  MailIcon,
-} from "lucide-react";
+import { ChevronLeft, LockIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import FormInput from "@/components/ui/FormInput";
@@ -44,21 +36,23 @@ export default function Login() {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGuestUserSignin, setIsGuestUserSignin] = useState(false);
 
   const router = useRouter();
 
-  const signInUser = async (e: React.FormEvent) => {
+  const signInUser = async (e: React.FormEvent, data?:SigninFormData) => {
     e.preventDefault();
 
-    setIsSubmitting(true);
+    if(!data) setIsSubmitting(!isSubmitting);
 
     toast.dismiss();
     const id = toast.loading("Loggin...");
 
-    const parseData = loginValidation.safeParse(formData);
+    console.log(data);
+
+    const parseData = formData.email ? loginValidation.safeParse(formData) : loginValidation.safeParse(data);
 
     if (!parseData.success) {
-
       toast.error(
         parseData.error.issues.slice(-1)[0].message || "Invalid Credentials",
         {
@@ -66,7 +60,7 @@ export default function Login() {
         }
       );
 
-      setIsSubmitting(false);
+      if(!data) setIsSubmitting(!isSubmitting);
 
       return;
     }
@@ -74,9 +68,9 @@ export default function Login() {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
+        email: parseData.data.email,
+        password: parseData.data.password,
+        role: parseData.data.role,
       });
 
       if (result?.error) {
@@ -98,8 +92,22 @@ export default function Login() {
 
       console.log(error);
     } finally {
-      setIsSubmitting(false);
+      if(!data) setIsSubmitting(!isSubmitting);
     }
+  };
+
+  const SignInAsGuestUser = async(e:React.FormEvent) => {
+    e.preventDefault();
+    setIsGuestUserSignin(true);
+    
+    const guestUserCredentials:SigninFormData = { 
+      role:"Student",
+      email: process.env.NEXT_PUBLIC_GUEST_EMAIL!,
+      password: process.env.NEXT_PUBLIC_GUEST_PASSWORD!,
+    }
+
+    await signInUser(e, guestUserCredentials);
+    setIsGuestUserSignin(false);
   };
 
   const handleChange = (e: any) => {
@@ -119,7 +127,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
       <div className="flex-1 flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -149,9 +157,7 @@ export default function Login() {
           <Tabs
             defaultValue="Student"
             onChange={handleChange}
-            onValueChange={(value) =>
-              handleChange({ name: "role", value })
-            }
+            onValueChange={(value) => handleChange({ name: "role", value })}
             className="w-full"
           >
             <TabsList className="grid grid-cols-3 mb-8">
@@ -188,6 +194,7 @@ export default function Login() {
                         error={errors.email}
                         icon={<MailIcon size={18} />}
                         required
+                        className=""
                       />
 
                       <div className="space-y-2">
@@ -212,13 +219,25 @@ export default function Login() {
                         </Link>
                       </div>
 
-                      <Button
-                        className="w-full mt-6"
-                        type="submit"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Signing in..." : "Sign in"}
-                      </Button>
+                      <div className="flex gap-4 justify-between items-center">
+                        <Button
+                          className="w-full mt-6"
+                          type="submit"
+                          disabled={isSubmitting || isGuestUserSignin}
+                        >
+                          {isSubmitting ? "Signing in..." : "Sign in"}
+                        </Button>
+
+                        <Button
+                          className="w-full mt-6"
+                          type="button"
+                          disabled={isSubmitting || isGuestUserSignin}
+                          onClick={SignInAsGuestUser}
+                          variant={"outline"}
+                        >
+                          {isGuestUserSignin ? "Signing in as Guest..." : "Sign in as Guest"}
+                        </Button>
+                      </div>
                     </form>
                   </CardContent>
                   <CardFooter className="flex justify-center">
