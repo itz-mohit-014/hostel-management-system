@@ -73,6 +73,10 @@ export const updateUserProfileData = async (updateData : any) => {
       if(updateData.profile.adminId) delete updateData.profile.adminId ;
   
       delete updateData.id;
+
+      if(role === "Student"){
+        updateData.courseName !== "other" ? updateData.otherCourseName = "" : null;
+      }
       
       const user =
         role === "Student"
@@ -147,9 +151,10 @@ export const SendVerifyEmail = async(email:string)=>{
     if(!addOtp || !addOtp.id){
       throw new CustomError("Failed to generate Otp")
     }
+
     mailSender(email, otp)
     
-    
+    return {message: "OTP sent successfully"};
 
   } catch (error) {
     if(error instanceof CustomError){

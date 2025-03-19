@@ -10,7 +10,7 @@ export const POST = async(req:NextRequest)=>{
 
     try {
 
-        await ensureDatabaseConnection();
+        // await ensureDatabaseConnection();
 
         let User;
         if(!data.email){

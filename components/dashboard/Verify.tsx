@@ -11,8 +11,6 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -25,15 +23,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function Verify({email, modal, setModal}:{email:string, modal:boolean, setModal:any,}) {
+export default function Verify({
+  email,
+  modal,
+  setModal,
+  setCurrentUser,
+  setEmail,
+}: {
+  email: string;
+  modal: boolean;
+  setModal: any;
+  setCurrentUser: any;
+  setEmail:any,
+}) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const [tempUser, setTempUser] = useState<any>({email:email});
-
-  console.log(tempUser)
-
-  const router = useRouter();
+  const [tempUser, setTempUser] = useState<any>({ email: email });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -93,20 +99,21 @@ export default function Verify({email, modal, setModal}:{email:string, modal:boo
       return;
     }
 
-
-    const data = {otp: otp.toString().replaceAll(",", ""), email:tempUser.email};
+    const data = {
+      otp: otp.toString().replaceAll(",", ""),
+      email: tempUser.email,
+    };
 
     try {
       const result = await axios.post("/api/auth/editEmail", data);
-        console.log(result)
 
       if (result.status == 200) {
         toast.success(result.data.message, {
           id: toastId,
         });
 
-        setModal(!modal)
-
+        setModal(!modal);
+        setEmail(result.data.email);
       }
     } catch (error) {
       localStorage.removeItem("userData");
@@ -120,19 +127,17 @@ export default function Verify({email, modal, setModal}:{email:string, modal:boo
           id: toastId,
         });
       }
-      
     }
   };
 
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 6);
-   
   }, []);
 
   if (!tempUser) return;
 
   return (
-    <div className="fixed  inset-0 z-[1000] place-items-center overflow-auto bg-[#e1e3e1] text-black bg-opacity-0 backdrop-blur-md">
+    <div className="fixed inset-0 z-[1000] grid place-items-center overflow-auto bg-[#e1e3e1]  bg-opacity-0 backdrop-blur-md">
       <div className="flex-1 flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -172,7 +177,10 @@ export default function Verify({email, modal, setModal}:{email:string, modal:boo
             </CardHeader>
 
             <CardContent>
-              <form className="flex flex-col items-center space-y-4 rounded-2xl  p-8">
+              <form
+                className="flex flex-col items-center space-y-4 rounded-2xl  p-8"
+                onSubmit={handleSubmit}
+              >
                 <div className="flex space-x-2">
                   {otp.map((digit, index) => (
                     <input
@@ -198,31 +206,18 @@ export default function Verify({email, modal, setModal}:{email:string, modal:boo
                 </div>
 
                 <div className="flex space-x-4 mt-4">
-                  <Link
-                    href={"/auth/signup"}
-                    className="border border-black dark:border-white px-4 rounded-md flex items-center justify-center"
-                  >
-                    <span>Cancel</span>
-                  </Link>
+                  <Button onClick={() => setModal(false)} variant="destructive">
+                    Cancel
+                  </Button>
+
                   <Button
                     type="submit"
-                    onClick={handleSubmit}
+                    variant="default"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
                     disabled={!isOtpComplete()}
                   >
                     Submit
                   </Button>
-                </div>
-
-                <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
-                  <p>Didn't recieve code?</p>{" "}
-                  <a
-                    className="flex flex-row items-center text-blue-600"
-                    href="http://"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Resend
-                  </a>
                 </div>
               </form>
             </CardContent>

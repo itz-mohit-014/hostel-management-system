@@ -38,7 +38,7 @@ export const nextOptions: NextAuthOptions = {
 
         try {
 
-          await ensureDatabaseConnection();
+          // await ensureDatabaseConnection();
 
           if (credentials?.role === "Student") {
             user = await prisma.user.findFirst({

@@ -84,8 +84,6 @@ const ProfilePicture = ({
       
     } finally {
       setUploading(false);
-     
-  
     }
   };
 
@@ -103,12 +101,18 @@ const ProfilePicture = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center space-y-4">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={profilePic} alt="Profile" className="object-cover h-full w-full"/>
+        <Avatar className="h-24 w-24 relative">
+          <AvatarImage src={profilePic} alt="Profile" className={`object-cover h-full w-full`}/>
+
           <AvatarFallback className="uppercase">
             {user?.firstName[0]}
             {user?.lastName[0]}
           </AvatarFallback>
+
+          {
+            uploading && <div className="absolute h-full w-full top-0 left-0 border-4  border-black dark:border-white rounded-full border-r-transparent animate-spin bg-white/50 dark:bg-black/50"></div>
+          }
+
         </Avatar>
 
         <div className="text-center">
@@ -158,7 +162,7 @@ const ProfilePicture = ({
 
         <Button
           variant="outline"
-          disabled={editProfile || uploading}
+          disabled={uploading}
           className="w-full"
           onClick={() => inputRef.current?.click()}
         >
@@ -175,6 +179,7 @@ const ProfilePicture = ({
           >
            Edit Profile
           </Button>
+
           <Button
             variant="outline"
             className={`w-full ${!editProfile && "hidden"}`}

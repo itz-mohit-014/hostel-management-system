@@ -20,7 +20,7 @@ export const POST = async (req: NextRequest) => {
 
   try {
 
-    await ensureDatabaseConnection(); 
+    // await ensureDatabaseConnection(); 
 
     const data : ReqData = await req.json(); // data : { userdata, otp } 
 

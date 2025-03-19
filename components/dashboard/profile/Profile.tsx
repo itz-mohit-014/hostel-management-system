@@ -20,15 +20,18 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { AdminUser, SendVerifyEmail, StudentUser, UserData,  } from "@/app/action";
+import {
+  AdminUser,
+  SendVerifyEmail,
+  StudentUser,
+  UserData,
+} from "@/app/action";
 import { useState } from "react";
 import { removeNullValues } from "@/hooks/removeNullValues";
 import ProfilePicture from "./ProfilePicture";
-import axios from "axios";
-import OTPInput from "@/app/auth/otp/page";
 import Verify from "../Verify";
-
-
+import { Check } from "lucide-react";
+import UpdatePassword from "./UpdatePassword";
 
 type updateUserDataField = AdminUser | StudentUser;
 
@@ -49,9 +52,8 @@ const Profile = ({ user, onUpdateProfile }: data) => {
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [editAccountSetting, setAccountSetting] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState(user);
-  const [modal, setModal] = useState<boolean>(false)
-  const [verifyEmail, setVerifyEmail] = useState<string>('')
-  // const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [modal, setModal] = useState<boolean>(false);
+  const [verifyEmail, setVerifyEmail] = useState<string>(currentUser.email);
 
   const {
     register,
@@ -84,7 +86,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     try {
       const updateData = removeNullValues(data);
       updateData.profile = removeNullValues(data.profile);
-      
+
       const result = await onUpdateProfile(updateData);
 
       console.log(result);
@@ -105,9 +107,6 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     }
   };
 
-  const updateUserPassword = (data: any) => {
-    console.log(data);
-  };
 
   const handleChange = (name: string, value: string) => {
     if (name === "courseName" && value !== "other") {
@@ -118,19 +117,46 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     }
   };
 
+  const cancelHandler = () => {
+    setAccountSetting(false);
+    reset();
+  };
 
-  const verifyHandler = async()=>{
-      const {email} = getValues()
-      setVerifyEmail(email)
-      const sendOtp = await SendVerifyEmail(email)
-      setModal(true)
+  const verifyHandler = async () => {
+    toast.dismiss();
+    const toastId = toast.loading("sending otp...");
 
-  }
+    const { email } = getValues();
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+    if (!emailPattern.test(email)) {
+      toast.error("invalid email", { id: toastId });
+      return;
+    }
+
+    setVerifyEmail(email);
+    try {
+      const sendOtp = await SendVerifyEmail(email);
+
+      if (typeof sendOtp === "string") {
+        toast.error(sendOtp, { id: toastId });
+        return;
+      }
+
+      if (sendOtp.message) {
+        toast.success(sendOtp.message, { id: toastId });
+        setModal(true);
+        return;
+      }
+    } catch (error) {
+      const errMsg = (error as Error).message || "Something went wrong.";
+      toast.error(errMsg);
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex flex-col  items-start gap-6 md:flex-row md:justify-evenly">
-
       <ProfilePicture
         user={currentUser}
         getValues={getValues}
@@ -139,7 +165,6 @@ const Profile = ({ user, onUpdateProfile }: data) => {
         register={register}
         updateUserDetails={updateUserDetails}
       />
-
 
       <Card className="flex-1 max-w-[480px]">
         <CardHeader>
@@ -153,7 +178,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
             <TabsList className="mb-4">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              {/* <TabsTrigger value="notifications">Notifications</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="general" className="space-y-4">
@@ -225,7 +250,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                     />
                   </div>
 
-                  <div className="space-y-2 md:col-span-2  flex flex-col">
+                  <div className="space-y-2 md:col-span-2 relative flex flex-col">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
@@ -235,9 +260,25 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                       {...register("email")}
                       disabled={!editAccountSetting}
                     />
-                         {watch("email") && watch("email") !== currentUser.email && (
-                        <Button type="button" onClick={()=>verifyHandler()} variant="secondary" className="inline-block ml-auto">Verify Email</Button>
-                      )}
+                    {
+                      watch("email") === verifyEmail && 
+                    <Check className="text-green-500 absolute top-5 right-2 text-xs"/>
+                    }
+
+                    {watch("email") && ( watch("email") !== verifyEmail )  && (
+                      <Button
+                        type="button"
+                        onClick={() => verifyHandler()}
+                        variant="secondary"
+                        className="inline-block ml-auto"
+                      >
+                        Verify Email
+                      </Button>
+                    )}
+
+                    {errors.email && (
+                      <p className="text-xs text-red-500">Email is not valid</p>
+                    )}
                   </div>
 
                   {currentUser.role === "Student" && (
@@ -245,14 +286,15 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                       <Label htmlFor="course">Course/Program</Label>
 
                       <Select
-                        defaultValue={currentUser.courseName}
-                        onValueChange={(value) =>
-                          handleChange("courseName", value)
-                        }
+                        value={watch("courseName")}
+                        onValueChange={(value) => {
+                          handleChange("courseName", value);
+                          // setSelectedCourse(value);
+                        }}
                         disabled={!editAccountSetting}
                       >
                         <SelectTrigger id="courseName">
-                          <SelectValue placeholder="Select course" />
+                          <SelectValue placeholder={currentUser.courseName} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="cse">Computer Science</SelectItem>
@@ -286,16 +328,26 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                 <div className="flex gap-4 w-fit ml-auto mt-10">
                   <Button
                     variant="outline"
-                    className="w-full"
-                    onClick={() => setAccountSetting(true)}
+                    className={`w-full ${editAccountSetting && "hidden"}`}
                     type="button"
                     disabled={editAccountSetting}
+                    onClick={() => setAccountSetting(true)}
                   >
-                    Edit
+                    Edit Profile
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    className={`w-full ${!editAccountSetting && "hidden"}`}
+                    type="button"
+                    onClick={() => cancelHandler()}
+                  >
+                    Cancel Edit
+                  </Button>
+
                   <Button
                     disabled={!editAccountSetting}
-                    variant={"secondary"}
+                    variant={!editAccountSetting ? "secondary" : "default"}
                     type="submit"
                   >
                     Save Changes
@@ -305,47 +357,27 @@ const Profile = ({ user, onUpdateProfile }: data) => {
             </TabsContent>
 
             <TabsContent value="password" className="space-y-4">
-              <form
-                onSubmit={handleSubmit(updateUserPassword)}
-                className="space-y-4"
-              >
-                <div className="space-y-6">
-                  <div className="space-y-2 max-w-[400px]">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="passwordd"
-                      placeholder="Enter new password"
-                      // {...register("newPassword")}
-                    />
-                  </div>
-                  <div className="space-y-2 max-w-[400px]">
-                    <Label htmlFor="confPassword">Confirm Password</Label>
-                    <Input
-                      id="confPassword"
-                      type="password"
-                      placeholder="Re-enter new password"
-                      // {...register("lastName")}
-                    />
-                  </div>
-                </div>
-
-                <Button variant={"secondary"} className="mt-10" type="submit">
-                  Save Changes
-                </Button>
-              </form>
+              <UpdatePassword/>
             </TabsContent>
 
-            <TabsContent
+            {/* <TabsContent
               value="notifications"
               className="space-y-4"
-            ></TabsContent>
+            ></TabsContent> */}
+
           </Tabs>
         </CardContent>
       </Card>
-      {
-        modal && <Verify email={verifyEmail} modal = {modal} setModal={setModal} />
-      }
+
+      {modal && (
+        <Verify
+          email={verifyEmail}
+          setEmail={setVerifyEmail}
+          modal={modal}
+          setModal={setModal}
+          setCurrentUser={setCurrentUser}
+        />
+      )}
     </div>
   );
 };

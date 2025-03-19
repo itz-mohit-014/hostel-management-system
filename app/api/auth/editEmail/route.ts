@@ -43,10 +43,12 @@ export const POST= async(req:NextRequest)=>{
         })
         return NextResponse.json({
             success:true,
-            message:"Email Verified Successfully"
+            message:"Email Verified Successfully",
+            email: data.email
         },{
             status:200
         })
+
     } catch (error) {
         if(error instanceof CustomError){
             return NextResponse.json({
