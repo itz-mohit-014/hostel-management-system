@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { nextOptions } from "./api/auth/[...nextauth]/options";
 import { AdminRegisterSchema, profile, studentRegisterSchema } from "@/common/types";
+import  otpGenerator  from 'otp-generator';
+import { mailSender } from "@/lib/mailSender";
 
 export type AdminUser = Omit<Zod.infer<typeof AdminRegisterSchema>, "password"> & { profile:  Zod.infer<typeof profile>  } ;
 export type StudentUser = Omit<Zod.infer<typeof studentRegisterSchema>, "password"> & { profile:  Zod.infer<typeof profile>  };
@@ -118,4 +120,42 @@ export const updateUserProfileData = async (updateData : any) => {
         return (error as Error).message ;
       }
     }
+}
+
+export const SendVerifyEmail = async(email:string)=>{
+  try {
+    if(!email) {
+      throw new CustomError("Email Not Found")
+    }
+    const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false ,lowerCaseAlphabets:false});
+    //delete previous otp
+
+    const deleteOtp = await prisma.otp.deleteMany({
+      where:{
+        email:email
+      }
+    })
+
+    const addOtp = await prisma.otp.create({      
+      data:{
+        otp:otp,
+        email:email,
+        expiresAt:new Date(Date.now() + 5 * 60 *1000)
+      }
+    })
+
+    if(!addOtp || !addOtp.id){
+      throw new CustomError("Failed to generate Otp")
+    }
+    mailSender(email, otp)
+    
+    
+
+  } catch (error) {
+    if(error instanceof CustomError){
+      return error.error
+    }else{
+      return (error as Error).message
+    }
+  }
 }
