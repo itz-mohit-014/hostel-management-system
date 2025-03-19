@@ -20,10 +20,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { AdminUser, StudentUser, UserData } from "@/app/action";
+import { AdminUser, SendVerifyEmail, StudentUser, UserData,  } from "@/app/action";
 import { useState } from "react";
 import { removeNullValues } from "@/hooks/removeNullValues";
 import ProfilePicture from "./ProfilePicture";
+import axios from "axios";
+import OTPInput from "@/app/auth/otp/page";
+import Verify from "../Verify";
 
 
 
@@ -46,6 +49,9 @@ const Profile = ({ user, onUpdateProfile }: data) => {
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [editAccountSetting, setAccountSetting] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState(user);
+  const [modal, setModal] = useState<boolean>(false)
+  const [verifyEmail, setVerifyEmail] = useState<string>('')
+  // const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const {
     register,
@@ -78,7 +84,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     try {
       const updateData = removeNullValues(data);
       updateData.profile = removeNullValues(data.profile);
-
+      
       const result = await onUpdateProfile(updateData);
 
       console.log(result);
@@ -112,8 +118,18 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     }
   };
 
+
+  const verifyHandler = async()=>{
+      const {email} = getValues()
+      setVerifyEmail(email)
+      const sendOtp = await SendVerifyEmail(email)
+      setModal(true)
+
+  }
+
+
   return (
-    <div className="flex flex-col items-start gap-6 md:flex-row">
+    <div className="flex flex-col  items-start gap-6 md:flex-row md:justify-evenly">
 
       <ProfilePicture
         user={currentUser}
@@ -209,7 +225,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                     />
                   </div>
 
-                  <div className="space-y-2 md:col-span-2">
+                  <div className="space-y-2 md:col-span-2  flex flex-col">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
@@ -219,6 +235,9 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                       {...register("email")}
                       disabled={!editAccountSetting}
                     />
+                         {watch("email") && watch("email") !== currentUser.email && (
+                        <Button type="button" onClick={()=>verifyHandler()} variant="secondary" className="inline-block ml-auto">Verify Email</Button>
+                      )}
                   </div>
 
                   {currentUser.role === "Student" && (
@@ -324,6 +343,9 @@ const Profile = ({ user, onUpdateProfile }: data) => {
           </Tabs>
         </CardContent>
       </Card>
+      {
+        modal && <Verify email={verifyEmail} modal = {modal} setModal={setModal} />
+      }
     </div>
   );
 };

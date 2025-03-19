@@ -25,11 +25,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function OTPInput() {
+export default function Verify({email, modal, setModal}:{email:string, modal:boolean, setModal:any,}) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const [tempUser, setTempUser] = useState<any>(null);
+  const [tempUser, setTempUser] = useState<any>({email:email});
+
+  console.log(tempUser)
 
   const router = useRouter();
 
@@ -91,26 +93,20 @@ export default function OTPInput() {
       return;
     }
 
-    const user =
-      localStorage.getItem("userData") &&
-      JSON.parse(localStorage.getItem("userData")!);
 
-    const data = {
-      userData: user,
-      otp: otp.toString().replaceAll(",", ""),
-    };
+    const data = {otp: otp.toString().replaceAll(",", ""), email:tempUser.email};
 
     try {
-      const result = await axios.post("/api/auth/signup", data);
+      const result = await axios.post("/api/auth/editEmail", data);
+        console.log(result)
 
       if (result.status == 200) {
-        toast.success("User register successfully", {
+        toast.success(result.data.message, {
           id: toastId,
         });
 
-        localStorage.removeItem("userData");
+        setModal(!modal)
 
-        router.push("/auth/signin");
       }
     } catch (error) {
       localStorage.removeItem("userData");
@@ -130,20 +126,13 @@ export default function OTPInput() {
 
   useEffect(() => {
     inputRefs.current = inputRefs.current.slice(0, 6);
-
-    const storedUser = localStorage.getItem("userData");
-
-    if (storedUser) {
-      setTempUser(JSON.parse(storedUser));
-    } else {
-      router.push("/auth/signup"); // Redirect to /signin if no user
-    }
+   
   }, []);
 
   if (!tempUser) return;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="fixed  inset-0 z-[1000] place-items-center overflow-auto bg-[#e1e3e1] text-black bg-opacity-0 backdrop-blur-md">
       <div className="flex-1 flex items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
