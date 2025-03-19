@@ -1,3 +1,5 @@
+"use server"
+
 import { CustomError } from "@/lib/Error";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -46,7 +48,7 @@ export const getUser = async (): Promise<UserData> => {
 };
 
 
-export const updateUserProfileData = async (updateData:any) => {
+export const updateUserProfileData = async (updateData : any) => {
   
     const session = await getServerSession(nextOptions);
 
@@ -56,20 +58,48 @@ export const updateUserProfileData = async (updateData:any) => {
 
     try {
 
+      if (!updateData || typeof updateData !== "object") {
+        throw new CustomError("Invalid update data", false, 400);
+      }
+
+      if (updateData.profile && typeof updateData.profile === "object") {
+        delete updateData.profile.id;
+      }
+
+      if(updateData.profile.userId) delete updateData.profile.userId ;
+      
+      if(updateData.profile.adminId) delete updateData.profile.adminId ;
+  
+      delete updateData.id;
+      
       const user =
         role === "Student"
           ? await prisma.user.update({
               where : {
                 id: id
               },
-              data: updateData,
+              data: {
+                ...updateData,
+                profile:{
+                  update: {
+                    ...updateData.profile
+                  }
+                }
+              },
               include: { profile: true } 
             })
             : await prisma.admin.update({
               where : {
                 id: id
               },
-              data: updateData,
+              data: {
+                ...updateData,
+                profile:{
+                  update: {
+                    ...updateData.profile
+                  }
+                }
+              },
               include: { profile: true } 
             });
   
@@ -80,6 +110,8 @@ export const updateUserProfileData = async (updateData:any) => {
       return userWithoutPassword as StudentUser | AdminUser;
   
     } catch (error) {
+      console.log(error)
+
       if (error instanceof CustomError) {
         return error.error;
       } else {

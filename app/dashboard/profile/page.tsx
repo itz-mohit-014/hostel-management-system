@@ -1,6 +1,6 @@
 "use server";
 
-import { getUser, updateUserProfileData, UserData } from "@/app/action";
+import { AdminUser, getUser, StudentUser, updateUserProfileData, UserData } from "@/app/action";
 import { Suspense } from "react";
 import Loading from "../loading";
 import Profile from "@/components/dashboard/profile/Profile";
@@ -9,17 +9,13 @@ import Profile from "@/components/dashboard/profile/Profile";
 export default async function ProfilePage() {
   const user: UserData = await getUser();
 
-  console.log(user);
-
   if (!user || !Object.keys(user).length) return;
 
-  const onUpdateProfile = async (data: any) => {
+  const onUpdateProfile = async (data: AdminUser | StudentUser | String) => {
     console.log(data);
-    data.profile.contact = "7894561230";
-    data.profile.roomNo = "123456ab";
     try {
       const result = await updateUserProfileData(data);
-      console.log(result);
+      return result;
     } catch (error) {
       console.log(error);
     }
@@ -34,7 +30,7 @@ export default async function ProfilePage() {
             Manage your account settings and preferences.
           </p>
         </div>
-        <Profile user={user}/>
+        <Profile user={user} onUpdateProfile={updateUserProfileData}/>
       </div>
     </Suspense>
   );

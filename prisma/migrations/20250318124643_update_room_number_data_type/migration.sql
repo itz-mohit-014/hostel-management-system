@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Profile" ALTER COLUMN "roomNo" SET DATA TYPE TEXT;

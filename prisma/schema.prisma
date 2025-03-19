@@ -49,7 +49,7 @@ model Profile {
   contact        String?
   profilePicture String?
   //only students can have room no
-  roomNo         Int?
+  roomNo         String? // 
   //Only student Can have hostel name
   hostelName     String?
   //hostel Care only warden gets hostel care

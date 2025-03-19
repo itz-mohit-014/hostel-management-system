@@ -17,20 +17,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { AdminUser, StudentUser, updateUserProfileData, UserData } from "@/app/action";
+import { AdminUser, StudentUser, UserData } from "@/app/action";
 import { useState } from "react";
+import { removeNullValues } from "@/hooks/removeNullValues";
+import ProfilePicture from "./ProfilePicture";
+
+
+
+type updateUserDataField = AdminUser | StudentUser;
 
 interface data {
   user: UserData;
-  // onUpdateProfile: (data: UserData) => UserData
-  onUpdateProfile?: (data: any) => any | void
+  onUpdateProfile: (data: updateUserDataField) => Promise<any>;
 }
-
-type updateUserDataField = AdminUser | StudentUser;
 
 const Profile = ({ user, onUpdateProfile }: data) => {
   if (!user || !Object.keys(user).length) return;
@@ -43,8 +45,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
 
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [editAccountSetting, setAccountSetting] = useState<boolean>(false);
-
-  const { role, ...userWithRole } = user;
+  const [currentUser, setCurrentUser] = useState(user);
 
   const {
     register,
@@ -53,21 +54,48 @@ const Profile = ({ user, onUpdateProfile }: data) => {
     setValue,
     resetField,
     watch,
-    getValues
+    reset,
+    getValues,
   } = useForm<updateUserDataField>({
-    defaultValues: userWithRole,
+    defaultValues: currentUser,
   });
 
-  const updateUserDetails = async (data: any) => {
-    console.log(data);
+  const updateUserDetails = async (data: updateUserDataField) => {
+    toast.dismiss();
+    const toastId = toast.loading("saving...");
+
     setAccountSetting(false);
     setEditProfile(false);
-    return;
+
+    const currentChanges = getValues();
+
+    if (JSON.stringify(currentChanges) === JSON.stringify(currentUser)) {
+      toast.dismiss(toastId);
+      toast.error("No changes detected.");
+      return;
+    }
+
     try {
-      // const result = await updateUserProfileData(data);
-      // console.log(result);
+      const updateData = removeNullValues(data);
+      updateData.profile = removeNullValues(data.profile);
+
+      const result = await onUpdateProfile(updateData);
+
+      console.log(result);
+
+      if (typeof result === "string") {
+        toast.error(result, { id: toastId });
+        reset();
+        return;
+      }
+
+      toast.success("Profile updated successfully!", { id: toastId });
+      setAccountSetting(false);
+      setCurrentUser(result);
     } catch (error) {
+      toast.error("Something went wrong...", { id: toastId });
       console.log(error);
+      reset();
     }
   };
 
@@ -86,69 +114,16 @@ const Profile = ({ user, onUpdateProfile }: data) => {
 
   return (
     <div className="flex flex-col items-start gap-6 md:flex-row">
-      <Card className="w-fit">
-        <CardHeader>
-          <CardTitle>Your Profile</CardTitle>
-          <CardDescription>
-            View and update your profile information.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center space-y-4">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={user.profile.profilePicture} alt="Profile" />
-            <AvatarFallback className="uppercase">
-              {user?.firstName[0]}
-              {user?.lastName[0]}
-            </AvatarFallback>
-          </Avatar>
 
-          <div className="text-center">
-            <h3 className="text-lg font-medium capitalize">
-              {user.firstName} {user.lastName}
-            </h3>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
-          </div>
+      <ProfilePicture
+        user={currentUser}
+        getValues={getValues}
+        editProfile={editProfile}
+        setEditProfile={setEditProfile}
+        register={register}
+        updateUserDetails={updateUserDetails}
+      />
 
-          {user.role === "Student" && (
-            <div className=" w-full space-y-2">
-              <Label htmlFor="studentId">Student ID</Label>
-              <Input
-                id="studentId"
-                type="text"
-                defaultValue={user.studentId}
-                disabled={!editProfile}
-                {...register("studentId")}
-                placeholder="Enter your strudent Id"
-              />
-            </div>
-          )}
-
-          <Button variant="outline" disabled={editProfile} className="w-full">
-            Change Avatar
-          </Button>
-
-          <div className="flex gap-4 w-full">
-            <Button
-              variant="outline"
-              className="w-full"
-              type="button"
-              disabled={editProfile}
-              onClick={() => setEditProfile(true)}
-            >
-              Edit Profile
-            </Button>
-
-            <Button
-              variant={editProfile ? "default" : "secondary"}
-              className="w-full"
-              disabled={!editProfile}
-              onClick={() => updateUserDetails(getValues())}
-            >
-              Save Changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card className="flex-1 max-w-[480px]">
         <CardHeader>
@@ -194,16 +169,30 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                     />
                   </div>
 
-                  {user.role === "Student" && (
+                  {currentUser.role === "Student" && (
                     <div className=" w-full space-y-2">
                       <Label htmlFor="roomNo">Room No.</Label>
                       <Input
                         id="roomNo"
                         type="text"
                         disabled={!editAccountSetting}
-                        defaultValue={user.profile.roomNo}
+                        defaultValue={currentUser.profile.roomNo}
                         {...register("profile.roomNo")}
                         placeholder="Enter your room number"
+                      />
+                    </div>
+                  )}
+
+                  {currentUser.role !== "Student" && (
+                    <div className=" w-full space-y-2">
+                      <Label htmlFor="roomNo">Department</Label>
+                      <Input
+                        id="department"
+                        type="text"
+                        disabled={!editAccountSetting}
+                        defaultValue={currentUser.department}
+                        {...register("department")}
+                        placeholder="Enter your department"
                       />
                     </div>
                   )}
@@ -213,31 +202,31 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                     <Input
                       id="contact"
                       type="tel"
-                      defaultValue={user.profile.contact}
+                      defaultValue={currentUser.profile.contact}
                       placeholder="Enter mobile number"
                       {...register("profile.contact")}
                       disabled={!editAccountSetting}
                     />
                   </div>
-                   
+
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
-                      defaultValue={user.email}
+                      defaultValue={currentUser.email}
                       placeholder="Enter email"
                       {...register("email")}
                       disabled={!editAccountSetting}
                     />
                   </div>
 
-                  {user.role === "Student" && (
+                  {currentUser.role === "Student" && (
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="course">Course/Program</Label>
 
                       <Select
-                        defaultValue={user.courseName}
+                        defaultValue={currentUser.courseName}
                         onValueChange={(value) =>
                           handleChange("courseName", value)
                         }
@@ -265,7 +254,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                         <Input
                           id="other"
                           type="text"
-                          defaultValue={user.otherCourseName}
+                          defaultValue={currentUser.otherCourseName}
                           placeholder="Enter departname name"
                           {...register("otherCourseName")}
                           disabled={!editAccountSetting}
@@ -273,7 +262,6 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                       )}
                     </div>
                   )}
-
                 </div>
 
                 <div className="flex gap-4 w-fit ml-auto mt-10">
@@ -286,7 +274,11 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                   >
                     Edit
                   </Button>
-                  <Button disabled={!editAccountSetting} variant={"secondary"} type="submit">
+                  <Button
+                    disabled={!editAccountSetting}
+                    variant={"secondary"}
+                    type="submit"
+                  >
                     Save Changes
                   </Button>
                 </div>
