@@ -156,7 +156,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
   };
 
   return (
-    <div className="flex flex-col  items-start gap-6 md:flex-row md:justify-evenly">
+    <div className="flex flex-col gap-6 lg:flex-row">
       <ProfilePicture
         user={currentUser}
         getValues={getValues}
@@ -166,14 +166,14 @@ const Profile = ({ user, onUpdateProfile }: data) => {
         updateUserDetails={updateUserDetails}
       />
 
-      <Card className="flex-1 max-w-[480px]">
-        <CardHeader>
+      <Card className="flex-1 bg-primary-foreground/25 max-w-[800px]">
+        <CardHeader className="px-4">
           <CardTitle>Account Settings</CardTitle>
           <CardDescription>
             Update your account information and preferences.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 pt-0">
           <Tabs defaultValue="general">
             <TabsList className="mb-4">
               <TabsTrigger value="general">General</TabsTrigger>
@@ -184,9 +184,9 @@ const Profile = ({ user, onUpdateProfile }: data) => {
             <TabsContent value="general" className="space-y-4">
               <form
                 onSubmit={handleSubmit(updateUserDetails)}
-                className="space-y-4"
+                className="space-y-6"
               >
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2 max-w-[480px]">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First name</Label>
                     <Input
@@ -257,12 +257,13 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                       type="email"
                       defaultValue={currentUser.email}
                       placeholder="Enter email"
+                      className="pr-9"
                       {...register("email")}
                       disabled={!editAccountSetting}
                     />
                     {
                       watch("email") === verifyEmail && 
-                    <Check className="text-green-500 absolute top-5 right-2 text-xs"/>
+                    <Check className="text-green-500 absolute top-6 right-1 h-5"/>
                     }
 
                     {watch("email") && ( watch("email") !== verifyEmail )  && (
@@ -325,10 +326,12 @@ const Profile = ({ user, onUpdateProfile }: data) => {
                   )}
                 </div>
 
-                <div className="flex gap-4 w-fit ml-auto mt-10">
+                <div className="h-[1px] w-full bg-primary/10"></div>
+
+                <div className="flex gap-4 max-sm:flex-wrap justify-end mt-10">
                   <Button
                     variant="outline"
-                    className={`w-full ${editAccountSetting && "hidden"}`}
+                    className={`w-full sm:w-fit ${editAccountSetting && "hidden"}`}
                     type="button"
                     disabled={editAccountSetting}
                     onClick={() => setAccountSetting(true)}
@@ -338,7 +341,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
 
                   <Button
                     variant="outline"
-                    className={`w-full ${!editAccountSetting && "hidden"}`}
+                    className={`w-full sm:w-fit ${!editAccountSetting && "hidden"}`}
                     type="button"
                     onClick={() => cancelHandler()}
                   >
@@ -347,6 +350,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
 
                   <Button
                     disabled={!editAccountSetting}
+                    className="w-full sm:w-fit"
                     variant={!editAccountSetting ? "secondary" : "default"}
                     type="submit"
                   >

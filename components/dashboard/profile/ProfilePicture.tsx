@@ -93,7 +93,7 @@ const ProfilePicture = ({
   }
 
   return (
-    <Card className="w-fit">
+    <Card className="bg-primary-foreground/25 max-w-[800px]">
       <CardHeader>
         <CardTitle>Your Profile</CardTitle>
         <CardDescription>
@@ -169,7 +169,7 @@ const ProfilePicture = ({
           {uploading ? "Uploading..." : "Change Avatar"}
         </Button>
 
-        <div className="flex gap-4 w-full">
+        <div className="flex gap-4 w-full max-sm:flex-wrap">
           <Button
             variant="outline"
             className={`w-full ${editProfile && "hidden"}`}

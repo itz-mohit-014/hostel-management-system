@@ -122,7 +122,9 @@ const UpdatePassword = () => {
         </div>
       </div>
 
-      <div className="flex gap-4 w-fit ml-auto mt-10">
+      <div className="h-[2px] w-full bg-primary/10"></div>
+
+      <div className="flex flex-wrap gap-4 w-fit ml-auto mt-10">
         <Button
           variant="outline"
           className={`w-full ${newPassword && "hidden"}`}
