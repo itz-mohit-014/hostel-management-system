@@ -134,7 +134,12 @@ export default function FeeDetailsPage() {
                   <TableCell>${fee.amount}</TableCell>
                   <TableCell>{fee.dueDate}</TableCell>
                   <TableCell>
-                    <Badge variant={fee.status === "Paid" ? "success" : "warning"}>{fee.status}</Badge>
+                    <Badge variant={fee.status  === "Paid"
+                          ? "default"
+                          : fee.status === "Pending"
+                            ? "secondary"
+                            : "outline"
+                         } className={fee.status === "Paid" ? "bg-green-300" : ""}>{fee.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm">

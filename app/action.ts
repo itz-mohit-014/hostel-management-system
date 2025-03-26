@@ -2,11 +2,11 @@
 
 import { CustomError } from "@/lib/Error";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { nextOptions } from "./api/auth/[...nextauth]/options";
+
 import { AdminRegisterSchema, profile, studentRegisterSchema } from "@/common/types";
 import  otpGenerator  from 'otp-generator';
 import { mailSender } from "@/lib/mailSender";
+import { serverSession } from "../lib/serverSession";
 
 export type AdminUser = Omit<Zod.infer<typeof AdminRegisterSchema>, "password"> & { profile:  Zod.infer<typeof profile>  } ;
 export type StudentUser = Omit<Zod.infer<typeof studentRegisterSchema>, "password"> & { profile:  Zod.infer<typeof profile>  };
@@ -15,11 +15,10 @@ export type UserData = AdminUser | StudentUser | null | string  ;
 
 export const getUser = async (): Promise<UserData> => {
 
-  const session = await getServerSession(nextOptions);
+  const userFromSession = await serverSession();
+  if (!userFromSession) return null;
 
-  if (!session?.user) return null;
-
-  const { id, role } = session?.user;
+  const { id, role } = userFromSession ;
 
   try {
 
@@ -52,11 +51,10 @@ export const getUser = async (): Promise<UserData> => {
 
 export const updateUserProfileData = async (updateData : any) => {
   
-    const session = await getServerSession(nextOptions);
+    const userFromSession = await serverSession();
+    if(!userFromSession) return null;
 
-    if (!session?.user) return null;
-
-    const {id, role} = session.user;
+    const {id , role} = userFromSession;
 
     try {
 

@@ -4,14 +4,21 @@ import Features from "@/components/home/Features";
 import Testimonials from "@/components/home/Testimonials";
 import ContactForm from "@/components/home/ContactForm";
 import FAQ from "@/components/home/FAQ";
-import Auth from "@/components/Auth";
+import { getServerSession } from "next-auth";
+import { nextOptions } from "./api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 
-export default function Home() {
+export default async function Home() {
+
+  const session = await getServerSession(nextOptions);
+
+  if (session) {
+    redirect("/dashboard"); 
+  }
 
   return ( 
     <Layout>
-      <Auth/>
       <Hero />
       <Features />
       <Testimonials />

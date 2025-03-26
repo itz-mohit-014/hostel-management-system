@@ -38,6 +38,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useClientSession } from "@/hooks/useClientSession"
+import { useEffect, useState } from "react"
+import { signOut } from "next-auth/react"
 
 export function DashboardSidebar() {
   const pathname = usePathname()
@@ -101,6 +104,22 @@ export function DashboardSidebar() {
 
   const { state } = useSidebar();
 
+  const [session, setSession] = useState<any>(null);
+  const clientSession = useClientSession();
+
+  const handleLogout = () => {
+    signOut({
+      callbackUrl: "/"
+    })
+  }
+
+  useEffect(() => {
+    if (clientSession){ 
+      setSession(clientSession);
+    }
+    
+  }, [clientSession]); 
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -161,15 +180,15 @@ export function DashboardSidebar() {
             <div className="flex items-center gap-2 group-data-[collapsible=icon]:overflow-hidden">
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src="/placeholder.svg?height=32&width=32"
+                  src={session?.profilePicture || ""}
                   alt="User"
                 />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>{session?.name?.slice(0,2)}</AvatarFallback>
               </Avatar>
 
               <div className="flex flex-col shrink-0">
-                <span className="text-sm font-medium">John Doe</span>
-                <span className="text-xs text-muted-foreground">Student</span>
+                <span className="text-sm font-medium capitalize">{session?.name  || ""}</span>
+                <span className="text-xs text-muted-foreground">{session?.role || "Student"}</span>
               </div>
 
             </div>
@@ -191,21 +210,32 @@ export function DashboardSidebar() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src="/placeholder.svg?height=32&width=32"
+                      src={session?.profilePicture || ""}
                       alt="User"
                     />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarFallback>{session?.name?.slice(0,2)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuContent className="w-48 ml-2 mb-2" align="end" forceMount>
+                <DropdownMenuItem>
+                    <Link href={"/dashboard/profile"} className="flex gap-1 justify-between w-full">
+                      <span>Profile</span>
+                      <User className="h-6 w-6" />
+                    </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                    <Link href={"/dashboard/settings"} className="flex gap-1 justify-between w-full">
+                      <span>Settings</span>
+                      <Settings className="h-6 w-6" />
+                    </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => {}}>
+                <DropdownMenuItem onClick={handleLogout}>
                   Log out 
-                  <LogOutIcon className="inline-block ml-auto"/>
+                  <LogOutIcon className="inline-block ml-auto text-red-500"/>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

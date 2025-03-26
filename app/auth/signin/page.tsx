@@ -48,8 +48,6 @@ export default function Login() {
     toast.dismiss();
     const id = toast.loading("Loggin...");
 
-    console.log(data);
-
     const parseData = formData.email ? loginValidation.safeParse(formData) : loginValidation.safeParse(data);
 
     if (!parseData.success) {

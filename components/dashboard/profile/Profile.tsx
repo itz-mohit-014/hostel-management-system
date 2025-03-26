@@ -284,7 +284,7 @@ const Profile = ({ user, onUpdateProfile }: data) => {
 
                   {currentUser.role === "Student" && (
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="course">Course/Program</Label>
+                      <Label htmlFor="courseName">Course/Program</Label>
 
                       <Select
                         value={watch("courseName")}

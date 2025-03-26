@@ -80,10 +80,10 @@ export const profile = z.object({
 
 export const complaint = z.object({
   type: z.string(),
-  title: z.string(),
+  subject: z.string(),
   status: z.string(),
   description: z.string().max(300),
-  image: z.string().optional(),
+  images: z.array(z.any()).optional(),
   user: z.string(),
 });
 

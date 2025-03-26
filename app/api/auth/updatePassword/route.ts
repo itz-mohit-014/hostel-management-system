@@ -1,17 +1,15 @@
 import { CustomError } from "@/lib/Error";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import  bcrypt  from 'bcrypt';
-import { nextOptions } from "../[...nextauth]/options";
 import { prisma } from "@/lib/prisma";
+import { serverSession } from "@/lib/serverSession";
 
 
 export const PUT = async(req:NextRequest)=>{
     try {
         const data = await req.json()
-        const session = await getServerSession(nextOptions)
 
-
+        const session = await serverSession();
         if(!session){
             throw new CustomError("Unauthorized Access")
         }
@@ -22,18 +20,18 @@ export const PUT = async(req:NextRequest)=>{
         }
  
         let user;
-        if(session.user.role === "Student"){
+        if(session.role === "Student"){
 
          user = await prisma.user.findUnique({
             where:{
-                id:session.user.id
+                id:session.id
             }
         })
         }
         else{
             user = await prisma.admin.findUnique({
                 where:{
-                    id:session.user.id
+                    id:session.id
                 }
             })  
         }
@@ -52,10 +50,10 @@ export const PUT = async(req:NextRequest)=>{
 
       const hashedPassword = bcrypt.hashSync(data.newPassword, salt);
         let updatePassword;
-        if(session.user.role === "Student"){
+        if(session.role === "Student"){
             updatePassword = await prisma.user.update({
                 where:{
-                    id:session.user.id
+                    id:session.id
                 },data:{
                     password:hashedPassword
                 }
@@ -63,7 +61,7 @@ export const PUT = async(req:NextRequest)=>{
         }else{
             updatePassword = await prisma.admin.update({
                 where:{
-                    id:session.user.id
+                    id:session.id
                 },data:{
                     password:hashedPassword
                 }

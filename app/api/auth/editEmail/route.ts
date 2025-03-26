@@ -1,14 +1,16 @@
 import { CustomError } from "@/lib/Error";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { nextOptions } from "../[...nextauth]/options";
+import { serverSession } from "@/lib/serverSession";
 
 export const POST= async(req:NextRequest)=>{
-    const session = await getServerSession(nextOptions)
-    if(!session || !session.user){
-        throw new CustomError("Something more wrong")
+
+    const session = await serverSession();
+
+    if(!session){
+        throw new CustomError("Unauthorised access");
     }
+
     try {
         const data = await req.json()
 
